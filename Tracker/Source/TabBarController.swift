@@ -25,14 +25,19 @@ final class TabBarController: UITabBarController {
     
     private func setupTabBar() {
         
-        let trackerVC = TrackerViewController()
+        let border = CALayer()
+                border.backgroundColor = UIColor(red: 0.70, green: 0.70, blue: 0.70, alpha: 1.00).cgColor
+                border.frame = CGRect(x: 0, y: 0, width: self.tabBar.bounds.width, height: 1.0)
+                self.tabBar.layer.addSublayer(border)
+        
+        let trackerVC = TrackerVC()
         let trackerNC = UINavigationController(rootViewController: trackerVC)
         trackerNC.navigationBar.prefersLargeTitles = true
         trackerVC.tabBarItem = UITabBarItem(title: "Trackers",
                                             image: .init(systemName: "record.circle.fill"),
                                             selectedImage: nil)
         
-        let statisticVC = StatisticViewController()
+        let statisticVC = StatisticVC()
         let statisticNC = UINavigationController(rootViewController: statisticVC)
         statisticVC.tabBarItem = UITabBarItem(title: "Statistics",
                                               image: .init(systemName: "hare.fill"),
