@@ -67,14 +67,19 @@ final class NewTrackerDetailsVC: UIViewController {
     // MARK: - Public Properties
     
     var newTrackerType: TrackerType?
+    weak var delegate: NewTrackerDelegate?
     
     // MARK: - Private Properties
     
     private let defaultCategory = "defaultCategory"
     private var chosenCategory: String = ""
     private var tableOptions = [(title: "Category", subtitle: nil as String?),
-                             (title: "Schedule", subtitle: nil as String?)]
-
+                                (title: "Schedule", subtitle: nil as String?)]
+    private var chosenTitle: String? = "default"
+    private var chosenColor: UIColor? = .systemPink
+    private var chosenEmoji: String? = "😄"
+    private var chosenSchedule: [WeekDay]?
+    
     // MARK: - Life cycle
     
     override func viewDidLoad() {
@@ -87,11 +92,44 @@ final class NewTrackerDetailsVC: UIViewController {
     // MARK: - Private Methods
     
     @objc private func createButtonPressed() {
-//        if let chosenTitle = chosenTitle,
-//                   let chosenColor = chosenColor,
-//                   let chosenEmoji = chosenEmoji {
-//                    formNewTracker(chosenCategory: chosenCategory, chosenTitle: chosenTitle, chosenColor: chosenColor, chosenEmoji: chosenEmoji, chosenSchedule: chosenSchedule)
-//                }
+        
+        guard let title = chosenTitle, !title.isEmpty,
+              let color = chosenColor,
+              let emoji = chosenEmoji else {
+            return
+        }
+        
+        let schedule = chosenSchedule ?? []
+        createNewTracker(chosenCategory: chosenCategory,
+                         chosenTitle: title,
+                         chosenColor: color,
+                         chosenEmoji: emoji,
+                         chosenSchedule: schedule)
+    }
+    
+    private func createNewTracker(chosenCategory: String,
+                                  chosenTitle: String,
+                                  chosenColor: UIColor,
+                                  chosenEmoji: String,
+                                  chosenSchedule: [WeekDay]?) {
+        
+        let schedule: [String]? = chosenSchedule?.isEmpty ?? true ? nil : chosenSchedule?.map { $0.fullName }
+        
+        let newTracker = Tracker(
+            id: UUID(),
+            name: chosenTitle,
+            color: chosenColor,
+            emoji: chosenEmoji,
+            schedule: schedule
+        )
+        
+        let newTrackerCategory = TrackerCategory(
+            title: chosenCategory,
+            trackers: [newTracker]
+        )
+        
+        delegate?.didReceiveNewTracker(newTrackerCategory: newTrackerCategory)
+        dismiss(animated: true, completion: nil)
     }
     
     @objc private func cancelButtonPressed() {
@@ -99,11 +137,18 @@ final class NewTrackerDetailsVC: UIViewController {
     }
     
     @objc private func textFieldDidChange() {
-        
+        chosenTitle = titleTextField.text
+        updateCreateButtonState()
     }
     
     @objc private func clearTextField() {
         titleTextField.text = ""
+    }
+    
+    private func updateCreateButtonState() {
+        let isFormValid = !(chosenTitle?.isEmpty ?? true)
+        createButton.isEnabled = isFormValid
+        createButton.backgroundColor = isFormValid ? .black : .gray
     }
     
     private func setupDefaultData() {
@@ -159,25 +204,27 @@ final class NewTrackerDetailsVC: UIViewController {
 extension NewTrackerDetailsVC: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-            return 75
-        }
+        return 75
+    }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-            let selectedCell = tableView.cellForRow(at: indexPath)
-            switch selectedCell?.textLabel?.text {
-            case "Category":
-                tableView.deselectRow(at: indexPath, animated: true)
-
-                //TODO: category
-            case "Schedule":
-                tableView.deselectRow(at: indexPath, animated: true)
-                let nextScreen = ScheduleVC()
-                navigationController?.pushViewController(nextScreen, animated: true)
-                
-            default:
-                tableView.deselectRow(at: indexPath, animated: true)
-            }
+        let selectedCell = tableView.cellForRow(at: indexPath)
+        switch selectedCell?.textLabel?.text {
+        case "Category":
+            chosenCategory = defaultCategory
+            tableOptions[0].subtitle = chosenCategory
+            tableView.deselectRow(at: indexPath, animated: true)
+            tableView.reloadData()
+            
+        case "Schedule":
+            let nextScreen = ScheduleVC()
+            nextScreen.delegate = self
+            nextScreen.scheduleSelection = chosenSchedule ?? []
+            navigationController?.pushViewController(nextScreen, animated: true)
+        default:
+            tableView.deselectRow(at: indexPath, animated: true)
         }
+    }
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         if indexPath.row == tableView.numberOfRows(inSection: indexPath.section) - 1 {
@@ -205,4 +252,16 @@ extension NewTrackerDetailsVC: UITableViewDataSource {
         return cell
     }
     
+}
+
+// MARK: - ScheduleSelectionDelegate
+
+extension NewTrackerDetailsVC: ScheduleSelectionDelegate {
+    
+    func didSelectSchedule(_ schedule: [WeekDay]) {
+        chosenSchedule = schedule
+        let scheduleText = schedule.isEmpty ? nil : schedule.map { $0.shortName }.joined(separator: ", ")
+        tableOptions[1].subtitle = scheduleText
+        tableView.reloadData()
+    }
 }

@@ -7,9 +7,15 @@
 
 import UIKit
 
+protocol TrackerCellDelegate: AnyObject {
+    func didToggleTracker(_ cell: TrackerCollectionViewCell)
+}
+
 final class TrackerCollectionViewCell: UICollectionViewCell {
     
     static let reuseIdentifier = "TrackerCollectionViewCell"
+    
+    // MARK: - UI Elements
     
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
@@ -50,8 +56,23 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         button.tintColor = .white
         button.layer.cornerRadius = 17
         button.layer.masksToBounds = true
+        button.addTarget(self, action: #selector(toggleTracker), for: .touchUpInside)
         return button
     }()
+    
+    // MARK: - Public Methods
+    
+    weak var delegate: TrackerCellDelegate?
+    
+    // MARK: - Private Properties
+    
+    private var trackerId: UUID?
+    private var isCompleted: Bool = false {
+        didSet { updateUI() }
+    }
+    
+    
+    // MARK: - Initializers
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -70,34 +91,32 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         actionButton.translatesAutoresizingMaskIntoConstraints = false
         countLabel.translatesAutoresizingMaskIntoConstraints = false
         
-        
-        
         NSLayoutConstraint.activate([
-                colorLabel.topAnchor.constraint(equalTo: contentView.topAnchor),
-                colorLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-                colorLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-                colorLabel.heightAnchor.constraint(equalToConstant: 90),
-                
-                emojiLabel.topAnchor.constraint(equalTo: colorLabel.topAnchor, constant: 12),
-                emojiLabel.leadingAnchor.constraint(equalTo: colorLabel.leadingAnchor, constant: 12),
-                emojiLabel.heightAnchor.constraint(equalToConstant: 24),
-                emojiLabel.widthAnchor.constraint(equalToConstant: 24),
-                
-                titleLabel.leadingAnchor.constraint(equalTo: colorLabel.leadingAnchor, constant: 12),
-                titleLabel.bottomAnchor.constraint(equalTo: colorLabel.bottomAnchor, constant: -12),
-                titleLabel.trailingAnchor.constraint(equalTo: colorLabel.trailingAnchor, constant: -12),
-                
-                actionButton.topAnchor.constraint(equalTo: colorLabel.bottomAnchor, constant: 8),
-                actionButton.trailingAnchor.constraint(equalTo: colorLabel.trailingAnchor, constant: -12),
-                actionButton.heightAnchor.constraint(equalToConstant: 34),
-                actionButton.widthAnchor.constraint(equalToConstant: 34),
-                
-                countLabel.topAnchor.constraint(equalTo: colorLabel.bottomAnchor, constant: 16),
-                countLabel.leadingAnchor.constraint(equalTo: colorLabel.leadingAnchor, constant: 12),
-                countLabel.trailingAnchor.constraint(equalTo: colorLabel.trailingAnchor, constant: -54),
-                countLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -24)
-                
-            ])
+            colorLabel.topAnchor.constraint(equalTo: contentView.topAnchor),
+            colorLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            colorLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            colorLabel.heightAnchor.constraint(equalToConstant: 90),
+            
+            emojiLabel.topAnchor.constraint(equalTo: colorLabel.topAnchor, constant: 12),
+            emojiLabel.leadingAnchor.constraint(equalTo: colorLabel.leadingAnchor, constant: 12),
+            emojiLabel.heightAnchor.constraint(equalToConstant: 24),
+            emojiLabel.widthAnchor.constraint(equalToConstant: 24),
+            
+            titleLabel.leadingAnchor.constraint(equalTo: colorLabel.leadingAnchor, constant: 12),
+            titleLabel.bottomAnchor.constraint(equalTo: colorLabel.bottomAnchor, constant: -12),
+            titleLabel.trailingAnchor.constraint(equalTo: colorLabel.trailingAnchor, constant: -12),
+            
+            actionButton.topAnchor.constraint(equalTo: colorLabel.bottomAnchor, constant: 8),
+            actionButton.trailingAnchor.constraint(equalTo: colorLabel.trailingAnchor, constant: -12),
+            actionButton.heightAnchor.constraint(equalToConstant: 34),
+            actionButton.widthAnchor.constraint(equalToConstant: 34),
+            
+            countLabel.topAnchor.constraint(equalTo: colorLabel.bottomAnchor, constant: 16),
+            countLabel.leadingAnchor.constraint(equalTo: colorLabel.leadingAnchor, constant: 12),
+            countLabel.trailingAnchor.constraint(equalTo: colorLabel.trailingAnchor, constant: -54),
+            countLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -24)
+            
+        ])
         
     }
     
@@ -105,19 +124,32 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func configure(with tracker: Tracker) {
-            
-            colorLabel.backgroundColor = tracker.color
+    // MARK: - Public Methods
+    
+    func configure(with tracker: Tracker, isCompleted: Bool, completedCount: Int, isFutureDate: Bool) {
+        self.trackerId = tracker.id
+        self.isCompleted = isCompleted
+        colorLabel.backgroundColor = tracker.color
         actionButton.backgroundColor = tracker.color
-            titleLabel.text = tracker.name
-            emojiLabel.text = tracker.emoji
-            countLabel.text = "1 year"
+        titleLabel.text = tracker.name
+        emojiLabel.text = tracker.emoji
+        countLabel.text = "\(completedCount) day\(completedCount == 1 ? "" : "s")"
         
-        }
-        
-        @objc private func toggleTracker() {
-//            isCompleted.toggle()
-//            actionButton.setTitle(isCompleted ? "✔️" : "+", for: .normal)
-        }
+        actionButton.isEnabled = !isFutureDate
+        updateUI()
+    }
+    
+    // MARK: - Private Methods
+    
+    @objc private func toggleTracker() {
+        guard trackerId != nil else { return }
+        delegate?.didToggleTracker(self)
+    }
+    
+    private func updateUI() {
+        let imageName = isCompleted ? "checkmark" : "plus"
+        actionButton.setImage(UIImage(systemName: imageName), for: .normal)
+        actionButton.alpha = isCompleted ? 0.5 : 1.0
+    }
     
 }
