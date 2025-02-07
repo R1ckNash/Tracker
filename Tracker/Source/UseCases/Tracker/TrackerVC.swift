@@ -95,11 +95,11 @@ final class TrackerVC: UIViewController {
         filteredCategories = categories.compactMap { category in
             let filteredTrackers = category.trackers.filter { tracker in
                 
-                if tracker.schedule == nil {
+                guard let schedule = tracker.schedule else {
                     return !completedTrackers.contains(where: { $0.id == tracker.id })
                 }
                 
-                return selectedWeekday.map { tracker.schedule!.contains($0.fullName) } ?? false
+                return selectedWeekday.map { schedule.contains($0.fullName) } ?? false
             }
             return filteredTrackers.isEmpty ? nil : TrackerCategory(title: category.title, trackers: filteredTrackers)
         }
@@ -247,11 +247,11 @@ extension TrackerVC: UICollectionViewDelegateFlowLayout {
 extension TrackerVC: UICollectionViewDataSource {
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return filteredCategories.count
+        filteredCategories.count
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return filteredCategories[section].trackers.count
+        filteredCategories[section].trackers.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -282,7 +282,11 @@ extension TrackerVC: UICollectionViewDataSource {
             ofKind: kind,
             withReuseIdentifier: SupplementaryView.reuseIdentifier,
             for: indexPath
-        ) as! SupplementaryView
+        ) as? SupplementaryView
+        
+        guard let view = view else {
+            return UICollectionReusableView()
+        }
         
         view.configure(with: filteredCategories[indexPath.section].title)
         return view

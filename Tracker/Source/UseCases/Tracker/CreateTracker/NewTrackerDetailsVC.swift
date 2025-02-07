@@ -75,9 +75,9 @@ final class NewTrackerDetailsVC: UIViewController {
     private var chosenCategory: String = ""
     private var tableOptions = [(title: "Category", subtitle: nil as String?),
                                 (title: "Schedule", subtitle: nil as String?)]
-    private var chosenTitle: String? = "default"
-    private var chosenColor: UIColor? = .systemPink
-    private var chosenEmoji: String? = "😄"
+    private var chosenTitle: String = "default"
+    private var chosenColor: UIColor = .systemPink
+    private var chosenEmoji: String = "😄"
     private var chosenSchedule: [WeekDay]?
     
     // MARK: - Life cycle
@@ -93,17 +93,11 @@ final class NewTrackerDetailsVC: UIViewController {
     
     @objc private func createButtonPressed() {
         
-        guard let title = chosenTitle, !title.isEmpty,
-              let color = chosenColor,
-              let emoji = chosenEmoji else {
-            return
-        }
-        
         let schedule = chosenSchedule ?? []
         createNewTracker(chosenCategory: chosenCategory,
-                         chosenTitle: title,
-                         chosenColor: color,
-                         chosenEmoji: emoji,
+                         chosenTitle: chosenTitle,
+                         chosenColor: chosenColor,
+                         chosenEmoji: chosenEmoji,
                          chosenSchedule: schedule)
     }
     
@@ -137,7 +131,7 @@ final class NewTrackerDetailsVC: UIViewController {
     }
     
     @objc private func textFieldDidChange() {
-        chosenTitle = titleTextField.text
+        chosenTitle = titleTextField.text ?? ""
         updateCreateButtonState()
     }
     
@@ -146,7 +140,7 @@ final class NewTrackerDetailsVC: UIViewController {
     }
     
     private func updateCreateButtonState() {
-        let isFormValid = !(chosenTitle?.isEmpty ?? true)
+        let isFormValid = !(chosenTitle.isEmpty)
         createButton.isEnabled = isFormValid
         createButton.backgroundColor = isFormValid ? .black : .gray
     }
@@ -204,7 +198,7 @@ final class NewTrackerDetailsVC: UIViewController {
 extension NewTrackerDetailsVC: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 75
+        75
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -238,7 +232,7 @@ extension NewTrackerDetailsVC: UITableViewDelegate {
 extension NewTrackerDetailsVC: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return tableOptions.count
+        tableOptions.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
