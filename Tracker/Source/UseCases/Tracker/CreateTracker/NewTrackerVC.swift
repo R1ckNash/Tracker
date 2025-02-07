@@ -36,6 +36,9 @@ final class NewTrackerVC: UIViewController {
         return button
     }()
     
+    // MARK: - Public Properties
+    weak var delegate: NewTrackerDelegate?
+    
     // MARK: - Life cycle
     
     override func viewDidLoad() {
@@ -49,12 +52,14 @@ final class NewTrackerVC: UIViewController {
     @objc private func habitButtonPressed() {
         let trackerDetailsVC = NewTrackerDetailsVC()
         trackerDetailsVC.newTrackerType = .habit
+        trackerDetailsVC.delegate = delegate
         navigationController?.pushViewController(trackerDetailsVC, animated: true)
     }
     
     @objc private func eventButtonPressed() {
         let trackerDetailsVC = NewTrackerDetailsVC()
         trackerDetailsVC.newTrackerType = .event
+        trackerDetailsVC.delegate = delegate
         navigationController?.pushViewController(trackerDetailsVC, animated: true)
     }
     

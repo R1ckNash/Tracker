@@ -36,6 +36,10 @@ enum WeekDay: Int, CaseIterable {
     }
 }
 
+protocol ScheduleSelectionDelegate: AnyObject {
+    func didSelectSchedule(_ schedule: [WeekDay])
+}
+
 final class ScheduleVC: UIViewController {
     
     // MARK: - UI Elements
@@ -59,9 +63,10 @@ final class ScheduleVC: UIViewController {
         return button
     }()
     
-    // MARK: - Private Properties
+    // MARK: - Public Properties
     
-    private var scheduleSelection: [WeekDay] = []
+    weak var delegate: ScheduleSelectionDelegate?
+    var scheduleSelection: [WeekDay] = []
     
     // MARK: - Life cycle
     
@@ -74,6 +79,7 @@ final class ScheduleVC: UIViewController {
     // MARK: - Private Methods
     
     @objc private func doneScheduleButtonPressed() {
+        delegate?.didSelectSchedule(scheduleSelection)
         navigationController?.popViewController(animated: true)
     }
     
