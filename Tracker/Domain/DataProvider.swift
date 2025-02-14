@@ -67,8 +67,9 @@ final class DataProvider: NSObject {
     
     func performFetchByDay(for dayOfWeek: String) {
         fetchedResultsController.fetchRequest.predicate = NSPredicate(
-            format: "ANY schedule.value == %@", dayOfWeek
+            format: "schedule.@count == 0 OR ANY schedule.value == %@", dayOfWeek
         )
+        
         do {
             try fetchedResultsController.performFetch()
         } catch {
@@ -76,11 +77,11 @@ final class DataProvider: NSObject {
         }
     }
     
-    func numberOfSections() -> Int {
+    func getNumberOfSections() -> Int {
         fetchedResultsController.sections?.count ?? 0
     }
     
-    func numberOfItems(inSection section: Int) -> Int {
+    func getNumberOfItems(inSection section: Int) -> Int {
         fetchedResultsController.sections?[section].numberOfObjects ?? 0
     }
     
@@ -93,24 +94,26 @@ final class DataProvider: NSObject {
         return firstObject.category?.title
     }
     
-    func object(at indexPath: IndexPath) -> Tracker {
-        trackerStore.convertToTracker(fetchedResultsController.object(at: indexPath))
-    }
-    
-    func deleteAllData() {
-        trackerCategoryStore.deleteTrackerCategories()
-        trackerStore.deleteTrackers()
-        trackerRecordStore.deleteAllRecords()
-    }
-    
     // MARK: - Tracker Methods
     
     func createTracker(tracker: Tracker) -> TrackerCD {
         trackerStore.createTracker(tracker)
     }
     
-    func fetchTracker(by id: UUID) -> TrackerCD? {
-        trackerStore.fetchTracker(by: id)
+    func getTracker(by id: UUID) -> Tracker {
+        guard let trackerDTO = trackerStore.fetchTracker(by: id) else {
+            fatalError("Tracker not found")
+        }
+        
+        return trackerStore.mapDtoToTracker(trackerDTO)
+    }
+    
+    func deleteTracker(by id: UUID) {
+        trackerStore.deleteTracker(by: id)
+    }
+    
+    func getTracker(at indexPath: IndexPath) -> Tracker {
+        trackerStore.mapDtoToTracker(fetchedResultsController.object(at: indexPath))
     }
     
     // MARK: - Tracker Category Methods
@@ -123,11 +126,11 @@ final class DataProvider: NSObject {
         trackerCategoryStore.updateTrackerCategory(withTitle: title, adding: newTracker)
     }
     
-    func getAllPossibleTitles() -> [String] {
+    func getAllTitles() -> [String] {
         trackerCategoryStore.getAllTitles()
     }
     
-    func fetchTrackerCategory(by title: String) -> TrackerCategoryCD? {
+    func getTrackerCategory(by title: String) -> TrackerCategoryCD? {
         trackerCategoryStore.fetchTrackerCategory(by: title)
     }
     
@@ -137,7 +140,7 @@ final class DataProvider: NSObject {
         trackerRecordStore.createRecord(for: id, on: date)
     }
     
-    func deleteRecord(with id: UUID, for date: Date) throws {
+    func deleteRecord(with id: UUID, for date: Date) {
         do {
             try trackerRecordStore.deleteRecord(for: id, on: date)
         } catch {
@@ -145,11 +148,11 @@ final class DataProvider: NSObject {
         }
     }
     
-    func checkRecordExist(with id: UUID, at date: Date) -> Bool {
+    func isRecordExist(for id: UUID, on date: Date) -> Bool {
         trackerRecordStore.isRecordExist(for: id, on: date)
     }
     
-    func getCompleteDays(for id: UUID) -> Int {
+    func getCompleteDaysCount(for id: UUID) -> Int {
         trackerRecordStore.completeDaysCount(for: id)
     }
 }
@@ -158,33 +161,7 @@ final class DataProvider: NSObject {
 
 extension DataProvider: NSFetchedResultsControllerDelegate {
     
-    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,
-                    didChange anObject: Any,
-                    at indexPath: IndexPath?,
-                    atSectionIndex sectionIndex: Int,
-                    for type: NSFetchedResultsChangeType,
-                    newIndexPath: IndexPath?) {
-        
-        let indexSet = IndexSet(integer: sectionIndex)
-        guard let trackerCollection = trackerCollection else { return }
-        
-        switch type {
-        case .insert:
-            trackerCollection.insertSections(indexSet)
-        case .delete:
-            if let indexPath = indexPath {
-                trackerCollection.deleteItems(at: [indexPath])
-            }
-        case .update:
-            if let indexPath = indexPath {
-                trackerCollection.reloadItems(at: [indexPath])
-            }
-        case .move:
-            if let indexPath = indexPath, let newIndexPath = newIndexPath {
-                trackerCollection.moveItem(at: indexPath, to: newIndexPath)
-            }
-        @unknown default:
-            fatalError("Unknown change type in NSFetchedResultsControllerDelegate.")
-        }
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        trackerCollection?.reloadData()
     }
 }

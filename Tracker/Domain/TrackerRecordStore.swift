@@ -30,9 +30,9 @@ final class TrackerRecordStore {
             return
         }
         
-        let newRecord = TrackerRecordCD(context: context)
-        newRecord.date = date
-        newRecord.tracker = tracker
+        let newRecordDto = TrackerRecordCD(context: context)
+        newRecordDto.date = date
+        newRecordDto.tracker = tracker
         saveContext()
     }
     

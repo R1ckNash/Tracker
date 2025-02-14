@@ -25,18 +25,18 @@ final class TrackerCategoryStore {
     // MARK: - Public Methods
     
     func createTrackerCategory(withTitle title: String) {
-        let trackerCategory = TrackerCategoryCD(context: context)
-        trackerCategory.title = title
+        let trackerCategoryDto = TrackerCategoryCD(context: context)
+        trackerCategoryDto.title = title
         saveContext()
     }
     
     func updateTrackerCategory(withTitle title: String, adding newTracker: Tracker) {
-        guard let trackerCategory = fetchTrackerCategory(by: title) else {
+        guard let trackerCategoryDto = fetchTrackerCategory(by: title) else {
             print("Tracker category with title \(title) not found.")
             return
         }
-        let newTrackerCD = trackerStore.createTracker(newTracker)
-        trackerCategory.addToTrackers(newTrackerCD)
+        let newTrackerDto = trackerStore.createTracker(newTracker)
+        trackerCategoryDto.addToTrackers(newTrackerDto)
         saveContext()
     }
     
@@ -62,14 +62,6 @@ final class TrackerCategoryStore {
         } catch {
             print("Error during fetching category with title \(title): \(error)")
             return nil
-        }
-    }
-    
-    func convertToCategory(_ trackerCategoriesCD: [TrackerCategoryCD]) -> [TrackerCategory] {
-        trackerCategoriesCD.map { categoryCD in
-            let trackers = (categoryCD.trackers as? Set<TrackerCD>)?
-                .map { trackerStore.convertToTracker($0) } ?? []
-            return TrackerCategory(title: categoryCD.title ?? "default", trackers: trackers)
         }
     }
     

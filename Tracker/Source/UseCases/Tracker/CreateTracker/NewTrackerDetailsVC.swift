@@ -166,16 +166,14 @@ final class NewTrackerDetailsVC: UIViewController {
                                   chosenTitle: String,
                                   chosenColor: UIColor,
                                   chosenEmoji: String,
-                                  chosenSchedule: [WeekDay]?) {
-        
-        let schedule: [String]? = chosenSchedule?.isEmpty ?? true ? nil : chosenSchedule?.map { $0.fullName }
+                                  chosenSchedule: [WeekDay]) {
         
         let newTracker = Tracker(
             id: UUID(),
             name: chosenTitle,
             color: chosenColor,
             emoji: chosenEmoji,
-            schedule: schedule
+            schedule: chosenSchedule.map { $0.fullName }
         )
         
         let newTrackerCategory = TrackerCategory(

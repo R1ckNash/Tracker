@@ -24,20 +24,20 @@ final class TrackerStore {
     
     @discardableResult
     func createTracker(_ tracker: Tracker) -> TrackerCD {
-        let trackerCD = TrackerCD(context: context)
-        trackerCD.id = tracker.id
-        trackerCD.name = tracker.name
-        trackerCD.emoji = tracker.emoji
-        trackerCD.color = tracker.color
+        let trackerDto = TrackerCD(context: context)
+        trackerDto.id = tracker.id
+        trackerDto.name = tracker.name
+        trackerDto.emoji = tracker.emoji
+        trackerDto.color = tracker.color
         
-        tracker.schedule?.forEach { date in
+        tracker.schedule.forEach { date in
             let scheduleEntry = ScheduleCD(context: context)
             scheduleEntry.value = date
-            scheduleEntry.tracker = trackerCD
+            scheduleEntry.tracker = trackerDto
         }
         
         saveContext()
-        return trackerCD
+        return trackerDto
     }
     
     func fetchTracker(by id: UUID) -> TrackerCD? {
@@ -53,16 +53,15 @@ final class TrackerStore {
         }
     }
     
-    func convertToTracker(_ trackerCD: TrackerCD) -> Tracker {
-        let schedule: [String] = (trackerCD.schedule as? Set<ScheduleCD>)?
+    func mapDtoToTracker(_ trackerDto: TrackerCD) -> Tracker {
+        let schedule: [String] = (trackerDto.schedule as? Set<ScheduleCD>)?
             .compactMap { $0.value } ?? []
         
-        return Tracker(
-            id: trackerCD.id ?? UUID(),
-            name: trackerCD.name ?? "default",
-            color: trackerCD.color as? UIColor ?? .orange,
-            emoji: trackerCD.emoji ?? "🫡",
-            schedule: schedule
+        return Tracker(id: trackerDto.id ?? UUID(),
+                       name: trackerDto.name ?? "default",
+                       color: trackerDto.color as? UIColor ?? .orange,
+                       emoji: trackerDto.emoji ?? "🫡",
+                       schedule: schedule
         )
     }
     
@@ -76,6 +75,15 @@ final class TrackerStore {
         } catch {
             print("Failed to delete trackers: \(error)")
         }
+    }
+    
+    func deleteTracker(by id: UUID) {
+        guard let trackerDto = fetchTracker(by: id) else {
+            print("Tracker with id \(id) not found for deletion.")
+            return
+        }
+        context.delete(trackerDto)
+        saveContext()
     }
     
     // MARK: - Private Methods
