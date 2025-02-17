@@ -22,19 +22,32 @@ final class TrackerRecordStore {
         self.trackerStore = trackerStore
     }
     
+    // MARK: - Private Methods
+    
+    private func saveContext() {
+        guard context.hasChanges else { return }
+        do {
+            try context.save()
+        } catch {
+            let nserror = error as NSError
+            fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+        }
+    }
+    
     // MARK: - Public Methods
     
     func createRecord(for trackerId: UUID, on date: Date) {
-        guard let tracker = trackerStore.fetchTracker(by: trackerId) else {
+        guard let trackerDTO = trackerStore.fetchTrackerDTO(by: trackerId) else {
             print("Error: Tracker with id \(trackerId) not found.")
             return
         }
         
-        let newRecordDto = TrackerRecordCD(context: context)
-        newRecordDto.date = date
-        newRecordDto.tracker = tracker
+        let newRecordDTO = TrackerRecordCD(context: context)
+        newRecordDTO.date = date
+        newRecordDTO.tracker = trackerDTO
         saveContext()
     }
+    
     
     func isRecordExist(for trackerId: UUID, on date: Date) -> Bool {
         let fetchRequest: NSFetchRequest<TrackerRecordCD> = TrackerRecordCD.fetchRequest()
@@ -50,6 +63,7 @@ final class TrackerRecordStore {
         }
     }
     
+    
     func completeDaysCount(for trackerId: UUID) -> Int {
         let fetchRequest: NSFetchRequest<TrackerRecordCD> = TrackerRecordCD.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "tracker.id == %@", trackerId as CVarArg)
@@ -61,6 +75,7 @@ final class TrackerRecordStore {
             return 0
         }
     }
+    
     
     func deleteRecord(for trackerId: UUID, on date: Date) throws {
         let fetchRequest: NSFetchRequest<TrackerRecordCD> = TrackerRecordCD.fetchRequest()
@@ -79,6 +94,7 @@ final class TrackerRecordStore {
         }
     }
     
+    
     func deleteAllRecords() {
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "TrackerRecordCD")
         let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
@@ -91,15 +107,4 @@ final class TrackerRecordStore {
         }
     }
     
-    // MARK: - Private Methods
-    
-    private func saveContext() {
-        guard context.hasChanges else { return }
-        do {
-            try context.save()
-        } catch {
-            let nserror = error as NSError
-            fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
-        }
-    }
 }

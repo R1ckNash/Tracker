@@ -146,6 +146,7 @@ final class NewTrackerDetailsVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        setupDismissKeyboardGesture()
         setupDefaultData()
         configureUI()
     }
@@ -196,6 +197,16 @@ final class NewTrackerDetailsVC: UIViewController {
     
     @objc private func clearTextField() {
         titleTextField.text = ""
+    }
+    
+    private func setupDismissKeyboardGesture() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
+    }
+    
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
     }
     
     private func updateCreateButtonState() {
@@ -354,31 +365,53 @@ extension NewTrackerDetailsVC: ScheduleSelectionDelegate {
 
 extension NewTrackerDetailsVC: UICollectionViewDelegateFlowLayout {
     
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return CGSize(width: 52, height: 52)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+        return 5
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 0
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        return UIEdgeInsets(top: 24, left: 0, bottom: 24, right: 0)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                        referenceSizeForHeaderInSection section: Int) -> CGSize {
+        return CGSize(width: collectionView.bounds.width, height: 18)
+    }
+    
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-            if collectionView.tag == 1 {
-                if let cell = collectionView.cellForItem(at: indexPath) as? EmojiCollectionViewCell {
-                    if let previousChosenEmojiCell {
-                        previousChosenEmojiCell.backgroundColor = nil
-                    }
-                    chosenEmoji = cell.getEmoji()
-                    cell.backgroundColor = .init(red: 0.90, green: 0.91, blue: 0.92, alpha: 1.00)
-                    cell.layer.cornerRadius = 16
-                    previousChosenEmojiCell = cell
+        if collectionView.tag == 1 {
+            if let cell = collectionView.cellForItem(at: indexPath) as? EmojiCollectionViewCell {
+                if let previousChosenEmojiCell {
+                    previousChosenEmojiCell.backgroundColor = nil
                 }
-            } else {
-                if let cell = collectionView.cellForItem(at: indexPath) as? ColorCollectionViewCell {
-                    if let previousChosenColorCell {
-                        previousChosenColorCell.layer.borderColor = nil
-                        previousChosenColorCell.layer.borderWidth = 0
-                    }
-                    chosenColor = cell.getColor()
-                    cell.layer.borderColor = chosenColor.cgColor
-                    cell.layer.borderWidth = 3
-                    cell.layer.cornerRadius = 8
-                    previousChosenColorCell = cell
+                chosenEmoji = cell.getEmoji()
+                cell.backgroundColor = .init(red: 0.90, green: 0.91, blue: 0.92, alpha: 1.00)
+                cell.layer.cornerRadius = 16
+                previousChosenEmojiCell = cell
+            }
+        } else {
+            if let cell = collectionView.cellForItem(at: indexPath) as? ColorCollectionViewCell {
+                if let previousChosenColorCell {
+                    previousChosenColorCell.layer.borderColor = nil
+                    previousChosenColorCell.layer.borderWidth = 0
                 }
+                chosenColor = cell.getColor()
+                cell.layer.borderColor = chosenColor.withAlphaComponent(0.3).cgColor
+                cell.layer.borderWidth = 3
+                cell.layer.cornerRadius = 8
+                previousChosenColorCell = cell
             }
         }
+    }
 }
 
 // MARK: - UICollectionViewDataSource
@@ -415,4 +448,5 @@ extension NewTrackerDetailsVC: UICollectionViewDataSource {
         header?.labelText = headerList[collectionView.tag - 1]
         return header ?? UICollectionReusableView()
     }
+    
 }

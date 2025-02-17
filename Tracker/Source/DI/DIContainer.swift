@@ -21,7 +21,7 @@ final class DIContainer {
     private let trackerCategoryStore: TrackerCategoryStore
     private let trackerRecordStore: TrackerRecordStore
     
-    // MARK: - Initializer
+    // MARK: - Initializers
     
     init() {
         persistentContainer = NSPersistentContainer(name: "TrackerModel")
@@ -30,21 +30,36 @@ final class DIContainer {
                 fatalError("Failed to load persistent stores: \(error)")
             }
         }
+        
         mainContext = persistentContainer.viewContext
         
-        trackerStore = TrackerStore(context: mainContext)
+        let fetchRequest: NSFetchRequest<TrackerCD> = TrackerCD.fetchRequest()
+        fetchRequest.sortDescriptors = [
+            NSSortDescriptor(key: "category.title", ascending: true),
+            NSSortDescriptor(key: "name", ascending: true)
+        ]
+        
+        let fetchedResultsController = NSFetchedResultsController(
+            fetchRequest: fetchRequest,
+            managedObjectContext: mainContext,
+            sectionNameKeyPath: "category.title",
+            cacheName: nil
+        )
+        
+        trackerStore = TrackerStore(context: mainContext, fetchedResultsController: fetchedResultsController)
         trackerCategoryStore = TrackerCategoryStore(context: mainContext, trackerStore: trackerStore)
         trackerRecordStore = TrackerRecordStore(context: mainContext, trackerStore: trackerStore)
     }
     
-    // MARK: - Factory Method
+    // MARK: - Public Methods
     
     func makeDataProvider(trackerCollection: UICollectionView? = nil) -> DataProvider {
-        
-        return DataProvider(context: mainContext,
-                            trackerStore: trackerStore,
-                            trackerCategoryStore: trackerCategoryStore,
-                            trackerRecordStore: trackerRecordStore,
-                            trackerCollection: trackerCollection)
+        return DataProvider(
+            trackerStore: trackerStore,
+            trackerCategoryStore: trackerCategoryStore,
+            trackerRecordStore: trackerRecordStore,
+            trackerCollection: trackerCollection
+        )
     }
+    
 }

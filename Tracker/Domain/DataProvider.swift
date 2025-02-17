@@ -7,14 +7,11 @@
 
 import Foundation
 import UIKit
-import CoreData
 
 final class DataProvider: NSObject {
     
     // MARK: - Private Properties
     
-    private let context: NSManagedObjectContext
-    private var fetchedResultsController: NSFetchedResultsController<TrackerCD>!
     private let trackerStore: TrackerStore
     private let trackerCategoryStore: TrackerCategoryStore
     private let trackerRecordStore: TrackerRecordStore
@@ -22,90 +19,48 @@ final class DataProvider: NSObject {
     
     // MARK: - Initializers
     
-    init(context: NSManagedObjectContext,
-         trackerStore: TrackerStore,
+    init(trackerStore: TrackerStore,
          trackerCategoryStore: TrackerCategoryStore,
          trackerRecordStore: TrackerRecordStore,
          trackerCollection: UICollectionView? = nil) {
         
-        self.context = context
         self.trackerStore = trackerStore
         self.trackerCategoryStore = trackerCategoryStore
         self.trackerRecordStore = trackerRecordStore
         self.trackerCollection = trackerCollection
         super.init()
-        setupFetchedResultsController()
-    }
-    
-    // MARK: - Private Methods
-    
-    private func setupFetchedResultsController() {
-        let fetchRequest: NSFetchRequest<TrackerCD> = TrackerCD.fetchRequest()
-        fetchRequest.sortDescriptors = [
-            NSSortDescriptor(key: "category.title", ascending: true),
-            NSSortDescriptor(key: "name", ascending: true)
-        ]
-        
-        fetchedResultsController = NSFetchedResultsController(
-            fetchRequest: fetchRequest,
-            managedObjectContext: context,
-            sectionNameKeyPath: "category.title",
-            cacheName: nil
-        )
-        fetchedResultsController.delegate = self
     }
     
     // MARK: - Public Methods
     
-    func performFetch() {
-        do {
-            try fetchedResultsController.performFetch()
-        } catch {
-            print("Failed to fetch data: \(error)")
-        }
-    }
-    
     func performFetchByDay(for dayOfWeek: String) {
-        fetchedResultsController.fetchRequest.predicate = NSPredicate(
-            format: "schedule.@count == 0 OR ANY schedule.value == %@", dayOfWeek
-        )
-        
-        do {
-            try fetchedResultsController.performFetch()
-        } catch {
-            print("Failed to update fetch request: \(error)")
-        }
+        trackerStore.performFetchByDay(for: dayOfWeek)
     }
     
     func getNumberOfSections() -> Int {
-        fetchedResultsController.sections?.count ?? 0
+        trackerStore.getNumberOfSections()
     }
     
     func getNumberOfItems(inSection section: Int) -> Int {
-        fetchedResultsController.sections?[section].numberOfObjects ?? 0
+        trackerStore.getNumberOfItems(inSection: section)
     }
     
     func category(for sectionIndex: Int) -> String? {
-        guard let sections = fetchedResultsController.sections,
-              sectionIndex < sections.count else {
-            return nil
-        }
-        let firstObject = fetchedResultsController.object(at: IndexPath(row: 0, section: sectionIndex))
-        return firstObject.category?.title
+        trackerStore.category(for: sectionIndex)
     }
     
     // MARK: - Tracker Methods
     
-    func createTracker(tracker: Tracker) -> TrackerCD {
+    func createTracker(tracker: Tracker) -> Tracker {
         trackerStore.createTracker(tracker)
     }
     
     func getTracker(by id: UUID) -> Tracker {
-        guard let trackerDTO = trackerStore.fetchTracker(by: id) else {
+        guard let tracker = trackerStore.fetchTracker(by: id) else {
             fatalError("Tracker not found")
         }
         
-        return trackerStore.mapDtoToTracker(trackerDTO)
+        return tracker
     }
     
     func deleteTracker(by id: UUID) {
@@ -113,7 +68,7 @@ final class DataProvider: NSObject {
     }
     
     func getTracker(at indexPath: IndexPath) -> Tracker {
-        trackerStore.mapDtoToTracker(fetchedResultsController.object(at: indexPath))
+        trackerStore.fetchTracker(at: indexPath)
     }
     
     // MARK: - Tracker Category Methods
@@ -130,7 +85,7 @@ final class DataProvider: NSObject {
         trackerCategoryStore.getAllTitles()
     }
     
-    func getTrackerCategory(by title: String) -> TrackerCategoryCD? {
+    func getTrackerCategory(by title: String) -> TrackerCategory? {
         trackerCategoryStore.fetchTrackerCategory(by: title)
     }
     
@@ -157,11 +112,3 @@ final class DataProvider: NSObject {
     }
 }
 
-// MARK: - NSFetchedResultsControllerDelegate
-
-extension DataProvider: NSFetchedResultsControllerDelegate {
-    
-    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        trackerCollection?.reloadData()
-    }
-}

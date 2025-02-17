@@ -8,7 +8,9 @@
 import UIKit
 
 protocol TrackerCellDelegate: AnyObject {
-    func didToggleTracker(id: UUID, _ cell: TrackerCollectionViewCell)
+    
+    func didDoneTracker(id: UUID, _ cell: TrackerCollectionViewCell)
+    func didCancelTracker(id: UUID)
 }
 
 final class TrackerCollectionViewCell: UICollectionViewCell {
@@ -148,7 +150,9 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     @objc private func toggleTracker() {
         guard let id = trackerId else { return }
         
-        delegate?.didToggleTracker(id: id, self)
+        isCompleted
+        ? delegate?.didCancelTracker(id: id)
+        : delegate?.didDoneTracker(id: id, self)
     }
     
     private func updateUI() {

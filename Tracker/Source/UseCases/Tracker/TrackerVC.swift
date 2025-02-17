@@ -52,15 +52,17 @@ final class TrackerVC: UIViewController {
     }()
     
     // MARK: - Private Properties
+    
     private var currentDate = Date()
-    private var dataProvider: DataProvider!
+    
+    private lazy var dataProvider: DataProvider = {
+        return DIContainer.shared.makeDataProvider(trackerCollection: self.collectionView)
+    }()
     
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        dataProvider = DIContainer.shared.makeDataProvider(trackerCollection: collectionView)
         
         configureUI()
         datePickerValueChanged()
@@ -278,20 +280,26 @@ extension TrackerVC: NewTrackerDelegate {
     }
 }
 
+// MARK: - TrackerCellDelegate
+
 extension TrackerVC: TrackerCellDelegate {
     
-    func didToggleTracker(id: UUID, _ cell: TrackerCollectionViewCell) {
+    func didDoneTracker(id: UUID, _ cell: TrackerCollectionViewCell) {
         
         guard let indexPath = collectionView.indexPath(for: cell) else { return }
         let tracker = dataProvider.getTracker(at: indexPath)
         
-        if dataProvider.isRecordExist(for: id, on: currentDate) {
-            dataProvider.deleteRecord(with: id, for: currentDate)
-        } else {
-            dataProvider.createRecord(with: id, for: currentDate)
-            if tracker.schedule.isEmpty {
-                dataProvider.deleteTracker(by: id)
-            }
+        dataProvider.createRecord(with: id, for: currentDate)
+        if tracker.schedule.isEmpty {
+            dataProvider.deleteTracker(by: id)
         }
+        collectionView.reloadData()
     }
+    
+    func didCancelTracker(id: UUID) {
+        
+        dataProvider.deleteRecord(with: id, for: currentDate)
+        collectionView.reloadData()
+    }
+    
 }
