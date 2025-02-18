@@ -47,8 +47,8 @@ final class DIContainer {
         )
         
         trackerStore = TrackerStore(context: mainContext, fetchedResultsController: fetchedResultsController)
-        trackerCategoryStore = TrackerCategoryStore(context: mainContext, trackerStore: trackerStore)
-        trackerRecordStore = TrackerRecordStore(context: mainContext, trackerStore: trackerStore)
+        trackerCategoryStore = TrackerCategoryStore(context: mainContext)
+        trackerRecordStore = TrackerRecordStore(context: mainContext)
     }
     
     // MARK: - Public Methods

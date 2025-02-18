@@ -42,9 +42,7 @@ final class TrackerStore {
         }
     }
     
-    // MARK: - Public Methods
-    
-    func mapDtoToTracker(_ trackerDto: TrackerCD) -> Tracker {
+    private func mapDtoToTracker(_ trackerDto: TrackerCD) -> Tracker {
         let schedule: [String] = (trackerDto.schedule as? Set<ScheduleCD>)?
             .compactMap { $0.value } ?? []
         
@@ -56,7 +54,7 @@ final class TrackerStore {
         )
     }
     
-    func fetchTrackerDTO(by id: UUID) -> TrackerCD? {
+    private func fetchTrackerDTO(by id: UUID) -> TrackerCD? {
         let fetchRequest: NSFetchRequest<TrackerCD> = TrackerCD.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "id == %@", id as CVarArg)
         fetchRequest.fetchLimit = 1
@@ -68,6 +66,25 @@ final class TrackerStore {
             return nil
         }
     }
+    
+    private func createTrackerDTO(_ tracker: Tracker) -> TrackerCD {
+        let trackerDTO = TrackerCD(context: context)
+        trackerDTO.id = tracker.id
+        trackerDTO.name = tracker.name
+        trackerDTO.emoji = tracker.emoji
+        trackerDTO.color = tracker.color
+        
+        tracker.schedule.forEach { day in
+            let scheduleEntry = ScheduleCD(context: context)
+            scheduleEntry.value = day
+            scheduleEntry.tracker = trackerDTO
+        }
+        
+        saveContext()
+        return trackerDTO
+    }
+    
+    // MARK: - Public Methods
     
     func performFetchByDay(for dayOfWeek: String) {
         fetchedResultsController.fetchRequest.predicate = NSPredicate(
@@ -97,23 +114,6 @@ final class TrackerStore {
     func createTracker(_ tracker: Tracker) -> Tracker {
         let trackerDTO = createTrackerDTO(tracker)
         return mapDtoToTracker(trackerDTO)
-    }
-    
-    func createTrackerDTO(_ tracker: Tracker) -> TrackerCD {
-        let trackerDTO = TrackerCD(context: context)
-        trackerDTO.id = tracker.id
-        trackerDTO.name = tracker.name
-        trackerDTO.emoji = tracker.emoji
-        trackerDTO.color = tracker.color
-        
-        tracker.schedule.forEach { day in
-            let scheduleEntry = ScheduleCD(context: context)
-            scheduleEntry.value = day
-            scheduleEntry.tracker = trackerDTO
-        }
-        
-        saveContext()
-        return trackerDTO
     }
     
     func fetchTracker(by id: UUID) -> Tracker? {

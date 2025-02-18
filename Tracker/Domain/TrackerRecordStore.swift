@@ -13,13 +13,11 @@ final class TrackerRecordStore {
     // MARK: - Private Properties
     
     private let context: NSManagedObjectContext
-    private var trackerStore: TrackerStore
     
     // MARK: - Initializers
     
-    init(context: NSManagedObjectContext, trackerStore: TrackerStore) {
+    init(context: NSManagedObjectContext) {
         self.context = context
-        self.trackerStore = trackerStore
     }
     
     // MARK: - Private Methods
@@ -34,10 +32,23 @@ final class TrackerRecordStore {
         }
     }
     
+    private func fetchTrackerDTO(by id: UUID) -> TrackerCD? {
+        let fetchRequest: NSFetchRequest<TrackerCD> = TrackerCD.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+        fetchRequest.fetchLimit = 1
+        
+        do {
+            return try context.fetch(fetchRequest).first
+        } catch {
+            print("Error fetching tracker DTO by id: \(error)")
+            return nil
+        }
+    }
+    
     // MARK: - Public Methods
     
     func createRecord(for trackerId: UUID, on date: Date) {
-        guard let trackerDTO = trackerStore.fetchTrackerDTO(by: trackerId) else {
+        guard let trackerDTO = fetchTrackerDTO(by: trackerId) else {
             print("Error: Tracker with id \(trackerId) not found.")
             return
         }

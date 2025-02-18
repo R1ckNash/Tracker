@@ -13,13 +13,11 @@ final class TrackerCategoryStore {
     // MARK: - Private Properties
     
     private let context: NSManagedObjectContext
-    private var trackerStore: TrackerStore
     
     // MARK: - Initializers
     
-    init(context: NSManagedObjectContext, trackerStore: TrackerStore) {
+    init(context: NSManagedObjectContext) {
         self.context = context
-        self.trackerStore = trackerStore
     }
     
     // MARK: - Private Methods
@@ -37,10 +35,39 @@ final class TrackerCategoryStore {
         }
     }
     
-    private func convertToTrackerCategory(_ dto: TrackerCategoryCD) -> TrackerCategory {
+    private func mapDtoToTrackerCategory(_ dto: TrackerCategoryCD) -> TrackerCategory {
         let trackers: [Tracker] = (dto.trackers as? Set<TrackerCD>)?
-            .compactMap { trackerStore.mapDtoToTracker($0) } ?? []
+            .compactMap { mapDtoToTracker($0) } ?? []
         return TrackerCategory(title: dto.title ?? "default", trackers: trackers)
+    }
+    
+    private func mapDtoToTracker(_ trackerDto: TrackerCD) -> Tracker {
+        let schedule: [String] = (trackerDto.schedule as? Set<ScheduleCD>)?
+            .compactMap { $0.value } ?? []
+        
+        return Tracker(id: trackerDto.id ?? UUID(),
+                       name: trackerDto.name ?? "default",
+                       color: trackerDto.color as? UIColor ?? .orange,
+                       emoji: trackerDto.emoji ?? "🫡",
+                       schedule: schedule
+        )
+    }
+    
+    private func createTrackerDTO(_ tracker: Tracker) -> TrackerCD {
+        let trackerDTO = TrackerCD(context: context)
+        trackerDTO.id = tracker.id
+        trackerDTO.name = tracker.name
+        trackerDTO.emoji = tracker.emoji
+        trackerDTO.color = tracker.color
+        
+        tracker.schedule.forEach { day in
+            let scheduleEntry = ScheduleCD(context: context)
+            scheduleEntry.value = day
+            scheduleEntry.tracker = trackerDTO
+        }
+        
+        saveContext()
+        return trackerDTO
     }
     
     private func saveContext() {
@@ -67,7 +94,7 @@ final class TrackerCategoryStore {
             return
         }
         
-        let newTrackerDTO = trackerStore.createTrackerDTO(newTracker)
+        let newTrackerDTO = createTrackerDTO(newTracker)
         trackerCategoryDTO.addToTrackers(newTrackerDTO)
         saveContext()
     }
@@ -85,7 +112,7 @@ final class TrackerCategoryStore {
     
     func fetchTrackerCategory(by title: String) -> TrackerCategory? {
         guard let dto = fetchTrackerCategoryDTO(by: title) else { return nil }
-        return convertToTrackerCategory(dto)
+        return mapDtoToTrackerCategory(dto)
     }
     
     func deleteTrackerCategories() {
