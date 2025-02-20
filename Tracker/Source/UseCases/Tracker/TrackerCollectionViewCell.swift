@@ -8,7 +8,9 @@
 import UIKit
 
 protocol TrackerCellDelegate: AnyObject {
-    func didToggleTracker(_ cell: TrackerCollectionViewCell)
+    
+    func didDoneTracker(id: UUID, _ cell: TrackerCollectionViewCell)
+    func didCancelTracker(id: UUID)
 }
 
 final class TrackerCollectionViewCell: UICollectionViewCell {
@@ -126,7 +128,11 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     
     // MARK: - Public Methods
     
-    func configure(with tracker: Tracker, isCompleted: Bool, completedCount: Int, isFutureDate: Bool) {
+    func configure(with tracker: Tracker,
+                   isCompleted: Bool,
+                   completedCount: Int,
+                   isFutureDate: Bool) {
+        
         self.trackerId = tracker.id
         self.isCompleted = isCompleted
         colorLabel.backgroundColor = tracker.color
@@ -142,8 +148,11 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     // MARK: - Private Methods
     
     @objc private func toggleTracker() {
-        guard trackerId != nil else { return }
-        delegate?.didToggleTracker(self)
+        guard let id = trackerId else { return }
+        
+        isCompleted
+        ? delegate?.didCancelTracker(id: id)
+        : delegate?.didDoneTracker(id: id, self)
     }
     
     private func updateUI() {
