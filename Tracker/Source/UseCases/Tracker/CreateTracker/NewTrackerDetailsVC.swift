@@ -146,7 +146,7 @@ final class NewTrackerDetailsVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        setupDismissKeyboardGesture()
+        configureKeyboard()
         setupDefaultData()
         configureUI()
     }
@@ -199,14 +199,8 @@ final class NewTrackerDetailsVC: UIViewController {
         titleTextField.text = ""
     }
     
-    private func setupDismissKeyboardGesture() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
-        tapGesture.cancelsTouchesInView = false
-        view.addGestureRecognizer(tapGesture)
-    }
-    
-    @objc private func dismissKeyboard() {
-        view.endEditing(true)
+    private func configureKeyboard() {
+        hideKeyboardWhenTappedAround()
     }
     
     private func updateCreateButtonState() {
