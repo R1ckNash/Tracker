@@ -99,7 +99,7 @@ final class TrackerCategoryStore {
         saveContext()
     }
     
-    func getAllTitles() -> [String] {
+    func getAllCategoryTitles() -> [String] {
         let fetchRequest: NSFetchRequest<TrackerCategoryCD> = TrackerCategoryCD.fetchRequest()
         do {
             let allCategories = try context.fetch(fetchRequest)

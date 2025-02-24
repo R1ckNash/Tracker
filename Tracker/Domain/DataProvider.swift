@@ -15,19 +15,16 @@ final class DataProvider: NSObject {
     private let trackerStore: TrackerStore
     private let trackerCategoryStore: TrackerCategoryStore
     private let trackerRecordStore: TrackerRecordStore
-    private weak var trackerCollection: UICollectionView?
     
     // MARK: - Initializers
     
     init(trackerStore: TrackerStore,
          trackerCategoryStore: TrackerCategoryStore,
-         trackerRecordStore: TrackerRecordStore,
-         trackerCollection: UICollectionView? = nil) {
+         trackerRecordStore: TrackerRecordStore) {
         
         self.trackerStore = trackerStore
         self.trackerCategoryStore = trackerCategoryStore
         self.trackerRecordStore = trackerRecordStore
-        self.trackerCollection = trackerCollection
         super.init()
     }
     
@@ -81,8 +78,8 @@ final class DataProvider: NSObject {
         trackerCategoryStore.updateTrackerCategory(withTitle: title, adding: newTracker)
     }
     
-    func getAllTitles() -> [String] {
-        trackerCategoryStore.getAllTitles()
+    func getAllCategoryTitles() -> [String] {
+        trackerCategoryStore.getAllCategoryTitles()
     }
     
     func getTrackerCategory(by title: String) -> TrackerCategory? {

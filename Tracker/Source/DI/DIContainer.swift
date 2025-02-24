@@ -53,13 +53,20 @@ final class DIContainer {
     
     // MARK: - Public Methods
     
-    func makeDataProvider(trackerCollection: UICollectionView? = nil) -> DataProvider {
+    func makeDataProvider() -> DataProvider {
         return DataProvider(
             trackerStore: trackerStore,
             trackerCategoryStore: trackerCategoryStore,
-            trackerRecordStore: trackerRecordStore,
-            trackerCollection: trackerCollection
+            trackerRecordStore: trackerRecordStore
         )
+    }
+    
+    func makeCategoryViewModel() -> CategoryViewModel {
+        CategoryViewModel()
+    }
+    
+    func makeScheduleVC() -> ScheduleVC {
+        ScheduleVC()
     }
     
 }
