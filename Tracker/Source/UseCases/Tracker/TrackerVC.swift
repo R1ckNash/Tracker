@@ -24,14 +24,12 @@ final class TrackerVC: UIViewController {
     
     private lazy var imageLabel: UIImageView = {
         let label = UIImageView()
-        label.translatesAutoresizingMaskIntoConstraints = false
         label.image = UIImage(named: "Mock")
         return label
     }()
     
     private lazy var textLabel: UILabel = {
         let label = UILabel()
-        label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "What are we going to track?"
         label.textColor = .black
         return label
@@ -56,7 +54,7 @@ final class TrackerVC: UIViewController {
     private var currentDate = Date()
     
     private lazy var dataProvider: DataProvider = {
-        return DIContainer.shared.makeDataProvider(trackerCollection: self.collectionView)
+        return DIContainer.shared.makeDataProvider()
     }()
     
     // MARK: - Lifecycle
@@ -137,11 +135,14 @@ final class TrackerVC: UIViewController {
     }
     
     private func setupMockScreen() {
+        
         view.addSubview(imageLabel)
         view.addSubview(textLabel)
         
+        imageLabel.translatesAutoresizingMaskIntoConstraints = false
+        textLabel.translatesAutoresizingMaskIntoConstraints = false
+        
         NSLayoutConstraint.activate([
-            
             imageLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             imageLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             imageLabel.widthAnchor.constraint(equalToConstant: 80),

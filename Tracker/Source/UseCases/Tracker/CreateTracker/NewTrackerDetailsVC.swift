@@ -214,6 +214,7 @@ final class NewTrackerDetailsVC: UIViewController {
         ? [(title: "Category", subtitle: defaultCategory),
            (title: "Schedule", subtitle: nil as String?)]
         : [(title: "Category", subtitle: defaultCategory)]
+        
         chosenCategory = defaultCategory
     }
     
@@ -297,19 +298,23 @@ extension NewTrackerDetailsVC: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
         let selectedCell = tableView.cellForRow(at: indexPath)
         switch selectedCell?.textLabel?.text {
         case "Category":
-            chosenCategory = defaultCategory
-            tableOptions[0].subtitle = chosenCategory
-            tableView.deselectRow(at: indexPath, animated: true)
-            tableView.reloadData()
+            
+            let categoryViewModel = CategoryViewModel()
+            let categoryVC = CategoryVC(categoryViewModel: categoryViewModel)
+            categoryVC.delegate = self
+            navigationController?.pushViewController(categoryVC, animated: true)
             
         case "Schedule":
+            
             let nextScreen = ScheduleVC()
             nextScreen.delegate = self
             nextScreen.scheduleSelection = chosenSchedule ?? []
             navigationController?.pushViewController(nextScreen, animated: true)
+            
         default:
             tableView.deselectRow(at: indexPath, animated: true)
         }
@@ -341,6 +346,17 @@ extension NewTrackerDetailsVC: UITableViewDataSource {
         return cell
     }
     
+}
+
+// MARK: - CategoryVCDelegate
+
+extension NewTrackerDetailsVC: CategoryVCDelegate {
+    
+    func didSelectCategory(_ category: String) {
+        chosenCategory = category
+        tableOptions[0].subtitle = chosenCategory
+        tableView.reloadData()
+    }
 }
 
 // MARK: - ScheduleSelectionDelegate
