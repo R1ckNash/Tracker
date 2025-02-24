@@ -113,11 +113,11 @@ final class CategoryVC: UIViewController {
     
     private func showMockScreen() {
         
-        let bool = categoryViewModel.getCategories().isEmpty
+        let areCategoriesEmpty = categoryViewModel.getCategories().isEmpty
         
-        placeholderImage.isHidden = !bool
-        placeholderLabel.isHidden = !bool
-        tableView.isHidden = bool
+        placeholderImage.isHidden = !areCategoriesEmpty
+        placeholderLabel.isHidden = !areCategoriesEmpty
+        tableView.isHidden = areCategoriesEmpty
     }
     
     private func configureUI() {
@@ -138,7 +138,7 @@ final class CategoryVC: UIViewController {
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             tableView.heightAnchor.constraint(equalToConstant:
-                                                CGFloat(75 * categoryViewModel.getCategories().count)),
+                                                CGFloat(75 * categoryViewModel.getCategoriesCount())),
             
             categoryButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             categoryButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),

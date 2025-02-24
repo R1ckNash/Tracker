@@ -22,18 +22,29 @@ final class OnboardingVC: UIPageViewController {
     
     // MARK: - Private Properties
     
-    private var pages: [UIViewController] = [
-        OnboardingPageVC(textTitle: "Track only what you want",
-                         image: UIImage(named: "backgroundBlue") ?? UIImage()),
-        
-        OnboardingPageVC(textTitle: "Even if it's not liters of water and yoga",
-                         image: UIImage(named: "backgroundRed") ?? UIImage())
-    ]
+    private var pages: [UIViewController] = []
+    
+    // MARK: - Public Properties
+    
+    var onFinish: (() -> Void)?
     
     // MARK: - Initializers
     
     init() {
         super.init(transitionStyle: .scroll, navigationOrientation: .horizontal, options: nil)
+        
+        pages = [
+            OnboardingPageVC(textTitle: "Track only what you want",
+                             image: UIImage(named: "backgroundBlue") ?? UIImage(),
+                             onClose: { [weak self] in
+                                 self?.onFinish?()
+                             }),
+            OnboardingPageVC(textTitle: "Even if it's not liters of water and yoga",
+                             image: UIImage(named: "backgroundRed") ?? UIImage(),
+                             onClose: {[weak self] in
+                                 self?.onFinish?()
+                             })
+        ]
     }
     
     required init?(coder: NSCoder) {

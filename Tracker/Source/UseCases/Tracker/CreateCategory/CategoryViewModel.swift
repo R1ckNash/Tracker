@@ -26,7 +26,7 @@ final class CategoryViewModel {
     // MARK: - Private Properties
     
     private lazy var dataProvider: DataProvider = {
-        return DIContainer.shared.makeDataProvider()
+        DIContainer.shared.makeDataProvider()
     }()
     
     private var categories: [String] = [] {
@@ -43,6 +43,10 @@ final class CategoryViewModel {
     
     func getCategories() -> [String] {
         categories
+    }
+    
+    func getCategoriesCount() -> Int {
+        categories.count
     }
     
     func isCategorySelected(_ category: String) -> Bool {

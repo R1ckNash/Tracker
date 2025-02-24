@@ -7,7 +7,7 @@
 
 import UIKit
 
-class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     var window: UIWindow?
     
@@ -15,15 +15,25 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                willConnectTo session: UISceneSession,
                options connectionOptions: UIScene.ConnectionOptions) {
         
-        guard let windowScene = (scene as? UIWindowScene) else { return }
+        guard let windowScene = scene as? UIWindowScene else { return }
         
         let window = UIWindow(windowScene: windowScene)
         self.window = window
         
-        if UserDefaults.standard.bool(forKey: "isOnboardingCompleted") == true {
+        if UserDefaultsService.shared.isOnboardingCompleted() {
             window.rootViewController = TabBarController()
         } else {
-            window.rootViewController = OnboardingVC()
+            let onboardingVC = OnboardingVC()
+            onboardingVC.onFinish = { [weak self] in
+                guard let window = self?.window else { return }
+                window.rootViewController = TabBarController()
+                UIView.transition(with: window,
+                                  duration: 0.3,
+                                  options: .transitionCrossDissolve,
+                                  animations: nil,
+                                  completion: nil)
+            }
+            window.rootViewController = onboardingVC
         }
         
         window.overrideUserInterfaceStyle = .light

@@ -41,11 +41,16 @@ final class OnboardingPageVC: UIViewController {
     private var textTitle: String
     private var image: UIImage
     
+    // MARK: - Public Properties
+    
+    var onClose: (() -> Void)?
+    
     // MARK: - Initializers
     
-    init(textTitle: String, image: UIImage) {
+    init(textTitle: String, image: UIImage, onClose: (() -> Void)? = nil) {
         self.textTitle = textTitle
         self.image = image
+        self.onClose = onClose
         
         super.init(nibName: nil, bundle: nil)
     }
@@ -94,22 +99,8 @@ final class OnboardingPageVC: UIViewController {
     
     
     @objc private func closeButtonPressed() {
-        
-        UserDefaults.standard.set(true, forKey: "isOnboardingCompleted")
-        let nextVC = TabBarController()
-        
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let window = windowScene.windows.first {
-            
-            window.rootViewController = nextVC
-            
-            UIView.transition(with: window,
-                              duration: 0.1,
-                              options: .transitionCrossDissolve,
-                              animations: nil,
-                              completion: nil)
-        }
-
+        UserDefaultsService.shared.setOnboardingCompleted()
+        onClose?()
     }
     
 }
