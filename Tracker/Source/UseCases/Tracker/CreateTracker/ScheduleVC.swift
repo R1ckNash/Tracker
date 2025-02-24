@@ -13,13 +13,13 @@ enum WeekDay: Int, CaseIterable {
     
     var fullName: String {
         switch self {
-        case .monday: return "Monday"
-        case .tuesday: return "Tuesday"
-        case .wednesday: return "Wednesday"
-        case .thursday: return "Thursday"
-        case .friday: return "Friday"
-        case .saturday: return "Saturday"
-        case .sunday: return "Sunday"
+        case .monday: return "monday".localized
+        case .tuesday: return "tuesday".localized
+        case .wednesday: return "wednesday".localized
+        case .thursday: return "thursday".localized
+        case .friday: return "friday".localized
+        case .saturday: return "saturday".localized
+        case .sunday: return "sunday".localized
         }
     }
     
@@ -108,7 +108,7 @@ final class ScheduleVC: UIViewController {
     private func configureUI() {
         
         view.backgroundColor = .white
-        navigationItem.title = "Schedule"
+        navigationItem.title = "scheduleVC.navTitle".localized
         navigationItem.hidesBackButton = true
         scheduleSelection.count > 0 ? enableDoneButton() : disableDoneButton()
         

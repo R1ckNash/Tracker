@@ -139,7 +139,8 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         actionButton.backgroundColor = tracker.color
         titleLabel.text = tracker.name
         emojiLabel.text = tracker.emoji
-        countLabel.text = "\(completedCount) day\(completedCount == 1 ? "" : "s")"
+        let format = NSLocalizedString("completedDays", comment: "completed days")
+        countLabel.text = String.localizedStringWithFormat(format, completedCount)
         
         actionButton.isEnabled = !isFutureDate
         updateUI()

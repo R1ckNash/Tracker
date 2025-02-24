@@ -30,14 +30,14 @@ final class TrackerVC: UIViewController {
     
     private lazy var textLabel: UILabel = {
         let label = UILabel()
-        label.text = "What are we going to track?"
+        label.text = "mock.title".localized
         label.textColor = .black
         return label
     }()
     
     private lazy var searchBar: UISearchBar = {
         let searchBar = UISearchBar()
-        searchBar.placeholder = "Search"
+        searchBar.placeholder = "search.placeholder".localized
         searchBar.searchBarStyle = .minimal
         return searchBar
     }()
@@ -106,7 +106,7 @@ final class TrackerVC: UIViewController {
     
     private func setupNavBar() {
         
-        navigationItem.title = "Trackers"
+        navigationItem.title = "trackerVC.navTitle".localized
         
         let addButton = UIBarButtonItem(
             barButtonSystemItem: .add,
@@ -128,7 +128,7 @@ final class TrackerVC: UIViewController {
     
     private func setupSearchController() {
         let searchController = UISearchController(searchResultsController: nil)
-        searchController.searchBar.placeholder = "Search"
+        searchController.searchBar.placeholder = "search.placeholder".localized
         searchController.obscuresBackgroundDuringPresentation = false
         navigationItem.searchController = searchController
         navigationItem.hidesSearchBarWhenScrolling = false

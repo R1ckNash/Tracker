@@ -1,0 +1,20 @@
+/* 
+  Localizable.strings
+  Tracker
+
+  Created by Ilia Liasin on 24/02/2025.
+  
+*/
+
+"search.placeholder" = "Search";
+"mock.title" = "What are we going to track?";
+"trackerVC.navTitle" = "Trackers";
+"scheduleVC.navTitle" = "Schedule";
+
+"monday" = "Monday";
+"tuesday" = "Tuesday";
+"wednesday" = "Wednesday";
+"thursday" = "Thursday";
+"friday" = "Friday";
+"saturday" = "Saturday";
+"sunday" = "Sunday";
