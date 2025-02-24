@@ -61,4 +61,12 @@ final class DIContainer {
         )
     }
     
+    func makeCategoryViewModel() -> CategoryViewModel {
+        CategoryViewModel()
+    }
+    
+    func makeScheduleVC() -> ScheduleVC {
+        ScheduleVC()
+    }
+    
 }

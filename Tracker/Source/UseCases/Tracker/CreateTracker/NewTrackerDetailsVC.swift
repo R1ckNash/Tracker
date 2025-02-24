@@ -302,18 +302,18 @@ extension NewTrackerDetailsVC: UITableViewDelegate {
         let selectedCell = tableView.cellForRow(at: indexPath)
         switch selectedCell?.textLabel?.text {
         case "Category":
-            
-            let categoryViewModel = CategoryViewModel()
+
+            let categoryViewModel = DIContainer.shared.makeCategoryViewModel()
             let categoryVC = CategoryVC(categoryViewModel: categoryViewModel)
             categoryVC.delegate = self
             navigationController?.pushViewController(categoryVC, animated: true)
             
         case "Schedule":
             
-            let nextScreen = ScheduleVC()
-            nextScreen.delegate = self
-            nextScreen.scheduleSelection = chosenSchedule ?? []
-            navigationController?.pushViewController(nextScreen, animated: true)
+            let scheduleVC = DIContainer.shared.makeScheduleVC()
+            scheduleVC.delegate = self
+            scheduleVC.scheduleSelection = chosenSchedule ?? []
+            navigationController?.pushViewController(scheduleVC, animated: true)
             
         default:
             tableView.deselectRow(at: indexPath, animated: true)
