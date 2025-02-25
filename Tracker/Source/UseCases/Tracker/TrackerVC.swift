@@ -35,13 +35,6 @@ final class TrackerVC: UIViewController {
         return label
     }()
     
-    private lazy var searchBar: UISearchBar = {
-        let searchBar = UISearchBar()
-        searchBar.placeholder = "search.placeholder".localized
-        searchBar.searchBarStyle = .minimal
-        return searchBar
-    }()
-    
     private lazy var datePicker: UIDatePicker = {
         let datePicker = UIDatePicker()
         datePicker.datePickerMode = .date
@@ -132,6 +125,7 @@ final class TrackerVC: UIViewController {
         searchController.obscuresBackgroundDuringPresentation = false
         navigationItem.searchController = searchController
         navigationItem.hidesSearchBarWhenScrolling = false
+        searchController.searchResultsUpdater = self
     }
     
     private func setupMockScreen() {
@@ -303,4 +297,15 @@ extension TrackerVC: TrackerCellDelegate {
         collectionView.reloadData()
     }
     
+}
+
+// MARK: - UISearchResultsUpdating
+
+extension TrackerVC: UISearchResultsUpdating {
+    
+    func updateSearchResults(for searchController: UISearchController) {
+        let searchText = searchController.searchBar.text
+        dataProvider.filterCategories(with: searchText)
+        collectionView.reloadData()
+    }
 }

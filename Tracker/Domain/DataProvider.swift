@@ -12,6 +12,9 @@ final class DataProvider: NSObject {
     
     // MARK: - Private Properties
     
+    private var categories: [TrackerCategory] = []
+    private var visibleCategories: [TrackerCategory] = []
+    
     private let trackerStore: TrackerStore
     private let trackerCategoryStore: TrackerCategoryStore
     private let trackerRecordStore: TrackerRecordStore
@@ -32,18 +35,38 @@ final class DataProvider: NSObject {
     
     func performFetchByDay(for dayOfWeek: String) {
         trackerStore.performFetchByDay(for: dayOfWeek)
+        loadCategories()
+    }
+    
+    func loadCategories() {
+        categories = trackerCategoryStore.fetchAllCategories()
+        visibleCategories = categories
+    }
+    
+    func filterCategories(with searchText: String?) {
+        guard let text = searchText, !text.isEmpty else {
+            visibleCategories = categories
+            return
+        }
+        
+        visibleCategories = categories.compactMap { category in
+            let filteredTrackers = category.trackers.filter { tracker in
+                tracker.name.lowercased().contains(text.lowercased())
+            }
+            return filteredTrackers.isEmpty ? nil : TrackerCategory(title: category.title, trackers: filteredTrackers)
+        }
     }
     
     func getNumberOfSections() -> Int {
-        trackerStore.getNumberOfSections()
+        visibleCategories.count
     }
     
     func getNumberOfItems(inSection section: Int) -> Int {
-        trackerStore.getNumberOfItems(inSection: section)
+        visibleCategories[section].trackers.count
     }
     
     func category(for sectionIndex: Int) -> String? {
-        trackerStore.category(for: sectionIndex)
+        visibleCategories[sectionIndex].title
     }
     
     // MARK: - Tracker Methods
@@ -65,7 +88,7 @@ final class DataProvider: NSObject {
     }
     
     func getTracker(at indexPath: IndexPath) -> Tracker {
-        trackerStore.fetchTracker(at: indexPath)
+        visibleCategories[indexPath.section].trackers[indexPath.item]
     }
     
     // MARK: - Tracker Category Methods

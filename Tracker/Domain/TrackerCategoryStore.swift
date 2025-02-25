@@ -99,6 +99,17 @@ final class TrackerCategoryStore {
         saveContext()
     }
     
+    func fetchAllCategories() -> [TrackerCategory] {
+        let fetchRequest: NSFetchRequest<TrackerCategoryCD> = TrackerCategoryCD.fetchRequest()
+        do {
+            let dtos = try context.fetch(fetchRequest)
+            return dtos.map { mapDtoToTrackerCategory($0) }
+        } catch {
+            print("Error fetching all categories: \(error)")
+            return []
+        }
+    }
+    
     func getAllCategoryTitles() -> [String] {
         let fetchRequest: NSFetchRequest<TrackerCategoryCD> = TrackerCategoryCD.fetchRequest()
         do {
