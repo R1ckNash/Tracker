@@ -69,6 +69,22 @@ final class DataProvider: NSObject {
         visibleCategories[sectionIndex].title
     }
     
+    // MARK: - Pin
+    
+    func isTrackerPinned(for id: UUID) -> Bool {
+        guard let pinnedCategory = getTrackerCategory(by: Constants.pinned) else { return false }
+        return pinnedCategory.trackers.contains(where: { $0.id == id })
+    }
+    
+    func pinTracker(with id: UUID) {
+        let tracker = getTracker(by: id)
+        trackerCategoryStore.addTrackerToPinned(tracker)
+    }
+    
+    func unpinTracker(with id: UUID) {
+        trackerCategoryStore.removeTrackerFromPinned(with: id)
+    }
+    
     // MARK: - Tracker Methods
     
     func createTracker(tracker: Tracker) -> Tracker {

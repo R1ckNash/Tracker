@@ -208,6 +208,68 @@ extension TrackerVC: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         return CGSize(width: collectionView.frame.width, height: 18)
     }
+    
+    func collectionView(_ collectionView: UICollectionView,
+                        contextMenuConfigurationForItemAt indexPath: IndexPath,
+                        point: CGPoint) -> UIContextMenuConfiguration? {
+        
+        let identifier = "\(indexPath.section)-\(indexPath.row)" as NSString
+        let tracker = dataProvider.getTracker(at: indexPath)
+        
+        return UIContextMenuConfiguration(identifier: identifier, previewProvider: nil) { [weak self] _ in
+            guard let self else { return UIMenu() }
+            let pinAction = self.createPinAction(for: tracker)
+            let editAction = self.createEditAction(for: tracker)
+            let deleteAction = self.createDeleteAction(for: tracker)
+            return UIMenu(children: [pinAction, editAction, deleteAction])
+        }
+    }
+    
+    private func createPinAction(for tracker: Tracker) -> UIAction {
+        let isPinned = dataProvider.isTrackerPinned(for: tracker.id)
+        let title = isPinned ? "Unpin" : "Pin"
+        return UIAction(title: title) { [weak self] _ in
+            guard let self = self else { return }
+            if isPinned {
+                self.dataProvider.unpinTracker(with: tracker.id)
+            } else {
+                self.dataProvider.pinTracker(with: tracker.id)
+            }
+            
+            self.filterTrackers()
+            self.collectionView.reloadData()
+        }
+    }
+    
+    private func createEditAction(for tracker: Tracker) -> UIAction {
+        return UIAction(title: "Edit") { [weak self] _ in
+        }
+    }
+    
+    private func createDeleteAction(for tracker: Tracker) -> UIAction {
+        return UIAction(title: "Delete", attributes: .destructive) { [weak self] _ in
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView,
+                        previewForHighlightingContextMenuWithConfiguration configuration: UIContextMenuConfiguration) -> UITargetedPreview? {
+        
+        guard let identifier = configuration.identifier as? String else { return nil }
+        
+        let components = identifier.split(separator: "-")
+        guard components.count == 2,
+              let section = Int(components[0]),
+              let row = Int(components[1])
+        else {
+            return nil
+        }
+        let indexPath = IndexPath(row: row, section: section)
+        guard let cell = collectionView.cellForItem(at: indexPath) as? TrackerCollectionViewCell else {
+            return nil
+        }
+        return UITargetedPreview(view: cell.getPreview())
+    }
+    
 }
 
 // MARK: - UICollectionViewDataSource
@@ -234,6 +296,9 @@ extension TrackerVC: UICollectionViewDataSource {
         let isCompleted = isTrackerCompleted(id: tracker.id)
         let completedCount = dataProvider.getCompleteDaysCount(for: tracker.id)
         let isFutureDate = currentDate > Date()
+        
+        let pinned = dataProvider.isTrackerPinned(for: tracker.id)
+        cell.updatePinIcon(isPinned: pinned)
         
         cell.configure(with: tracker, isCompleted: isCompleted, completedCount: completedCount, isFutureDate: isFutureDate)
         cell.delegate = self

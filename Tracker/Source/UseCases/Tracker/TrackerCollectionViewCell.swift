@@ -21,6 +21,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .systemFont(ofSize: 12, weight: .medium)
         label.textColor = .white
         label.textAlignment = .natural
@@ -30,6 +31,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     
     private lazy var emojiLabel: UILabel = {
         let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
         label.textAlignment = .center
         label.font = .systemFont(ofSize: 16, weight: .medium)
         label.backgroundColor = .init(white: 1, alpha: 0.5)
@@ -38,15 +40,25 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         return label
     }()
     
-    private lazy var colorLabel: UIView = {
+    private lazy var previewContainerView: UIView = {
         let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
         view.layer.cornerRadius = 16
         view.layer.masksToBounds = true
         return view
     }()
     
+    private lazy var pinIconImageView: UIImageView = {
+        let iv = UIImageView(image: UIImage(systemName: "pin.fill"))
+        iv.translatesAutoresizingMaskIntoConstraints = false
+        iv.tintColor = .white
+        iv.isHidden = true
+        return iv
+    }()
+    
     private lazy var countLabel: UILabel = {
         let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .systemFont(ofSize: 12, weight: .medium)
         label.textColor = .black
         return label
@@ -54,6 +66,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     
     private lazy var actionButton: UIButton = {
         let button = UIButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
         button.setImage(.init(systemName: "plus"), for: .normal)
         button.tintColor = .white
         button.layer.cornerRadius = 17
@@ -81,45 +94,45 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         
         contentView.backgroundColor = .white
         
-        contentView.addSubview(colorLabel)
-        contentView.addSubview(emojiLabel)
-        contentView.addSubview(titleLabel)
+        contentView.addSubview(previewContainerView)
+        previewContainerView.addSubview(emojiLabel)
+        previewContainerView.addSubview(titleLabel)
+        previewContainerView.addSubview(pinIconImageView)
+        
         contentView.addSubview(actionButton)
         contentView.addSubview(countLabel)
         
-        colorLabel.translatesAutoresizingMaskIntoConstraints = false
-        emojiLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        actionButton.translatesAutoresizingMaskIntoConstraints = false
-        countLabel.translatesAutoresizingMaskIntoConstraints = false
-        
         NSLayoutConstraint.activate([
-            colorLabel.topAnchor.constraint(equalTo: contentView.topAnchor),
-            colorLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            colorLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            colorLabel.heightAnchor.constraint(equalToConstant: 90),
             
-            emojiLabel.topAnchor.constraint(equalTo: colorLabel.topAnchor, constant: 12),
-            emojiLabel.leadingAnchor.constraint(equalTo: colorLabel.leadingAnchor, constant: 12),
+            previewContainerView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            previewContainerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            previewContainerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            previewContainerView.heightAnchor.constraint(equalToConstant: 90),
+            
+            emojiLabel.topAnchor.constraint(equalTo: previewContainerView.topAnchor, constant: 12),
+            emojiLabel.leadingAnchor.constraint(equalTo: previewContainerView.leadingAnchor, constant: 12),
             emojiLabel.heightAnchor.constraint(equalToConstant: 24),
             emojiLabel.widthAnchor.constraint(equalToConstant: 24),
             
-            titleLabel.leadingAnchor.constraint(equalTo: colorLabel.leadingAnchor, constant: 12),
-            titleLabel.bottomAnchor.constraint(equalTo: colorLabel.bottomAnchor, constant: -12),
-            titleLabel.trailingAnchor.constraint(equalTo: colorLabel.trailingAnchor, constant: -12),
+            titleLabel.leadingAnchor.constraint(equalTo: previewContainerView.leadingAnchor, constant: 12),
+            titleLabel.bottomAnchor.constraint(equalTo: previewContainerView.bottomAnchor, constant: -12),
+            titleLabel.trailingAnchor.constraint(equalTo: previewContainerView.trailingAnchor, constant: -12),
             
-            actionButton.topAnchor.constraint(equalTo: colorLabel.bottomAnchor, constant: 8),
-            actionButton.trailingAnchor.constraint(equalTo: colorLabel.trailingAnchor, constant: -12),
+            pinIconImageView.topAnchor.constraint(equalTo: previewContainerView.topAnchor, constant: 18),
+            pinIconImageView.trailingAnchor.constraint(equalTo: previewContainerView.trailingAnchor, constant: -12),
+            pinIconImageView.heightAnchor.constraint(equalToConstant: 12),
+            pinIconImageView.widthAnchor.constraint(equalToConstant: 12),
+            
+            actionButton.topAnchor.constraint(equalTo: previewContainerView.bottomAnchor, constant: 8),
+            actionButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
             actionButton.heightAnchor.constraint(equalToConstant: 34),
             actionButton.widthAnchor.constraint(equalToConstant: 34),
             
-            countLabel.topAnchor.constraint(equalTo: colorLabel.bottomAnchor, constant: 16),
-            countLabel.leadingAnchor.constraint(equalTo: colorLabel.leadingAnchor, constant: 12),
-            countLabel.trailingAnchor.constraint(equalTo: colorLabel.trailingAnchor, constant: -54),
+            countLabel.topAnchor.constraint(equalTo: previewContainerView.bottomAnchor, constant: 16),
+            countLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
+            countLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -54),
             countLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -24)
-            
         ])
-        
     }
     
     required init?(coder: NSCoder) {
@@ -135,7 +148,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         
         self.trackerId = tracker.id
         self.isCompleted = isCompleted
-        colorLabel.backgroundColor = tracker.color
+        previewContainerView.backgroundColor = tracker.color
         actionButton.backgroundColor = tracker.color
         titleLabel.text = tracker.name
         emojiLabel.text = tracker.emoji
@@ -144,6 +157,14 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         
         actionButton.isEnabled = !isFutureDate
         updateUI()
+    }
+    
+    func updatePinIcon(isPinned: Bool) {
+        pinIconImageView.isHidden = !isPinned
+    }
+    
+    func getPreview() -> UIView {
+        previewContainerView
     }
     
     // MARK: - Private Methods
