@@ -91,12 +91,27 @@ final class DataProvider: NSObject {
         trackerStore.createTracker(tracker)
     }
     
+    func updateTracker(_ tracker: Tracker) {
+        trackerStore.updateTracker(tracker)
+    }
+    
+    func trackerExists(with id: UUID) -> Bool {
+        trackerStore.fetchTracker(by: id) != nil
+    }
+    
     func getTracker(by id: UUID) -> Tracker {
         guard let tracker = trackerStore.fetchTracker(by: id) else {
             fatalError("Tracker not found")
         }
         
         return tracker
+    }
+    
+    func getTrackerCategoryName(by id: UUID) -> String {
+        guard let categoryName = trackerStore.getTrackerCategoryName(by: id) else {
+            fatalError("Tracker category not found")
+        }
+        return categoryName
     }
     
     func deleteTracker(by id: UUID) {

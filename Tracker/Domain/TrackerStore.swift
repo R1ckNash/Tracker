@@ -121,6 +121,34 @@ final class TrackerStore {
         return mapDtoToTracker(trackerDTO)
     }
     
+    func updateTracker(_ tracker: Tracker) {
+        guard let trackerDTO = fetchTrackerDTO(by: tracker.id) else {
+            print("Tracker with id \(tracker.id) not found for update")
+            return
+        }
+        trackerDTO.name = tracker.name
+        trackerDTO.emoji = tracker.emoji
+        trackerDTO.color = tracker.color
+        
+        if let scheduleSet = trackerDTO.schedule as? Set<ScheduleCD> {
+            for scheduleEntry in scheduleSet {
+                context.delete(scheduleEntry)
+            }
+        }
+        
+        for day in tracker.schedule {
+            let scheduleEntry = ScheduleCD(context: context)
+            scheduleEntry.value = day
+            scheduleEntry.tracker = trackerDTO
+        }
+        saveContext()
+    }
+    
+    func getTrackerCategoryName(by id: UUID) -> String? {
+        guard let trackerDTO = fetchTrackerDTO(by: id) else { return nil }
+        return trackerDTO.category?.title
+    }
+    
     func fetchTracker(at indexPath: IndexPath) -> Tracker {
         mapDtoToTracker(fetchedResultsController.object(at: indexPath))
     }
@@ -142,9 +170,15 @@ final class TrackerStore {
             print("Tracker with id \(id) not found for deletion.")
             return
         }
+        
+        if let categoryDto = trackerDto.category,
+           categoryDto.trackers?.count == 1 {
+            context.delete(categoryDto)
+            saveContext()
+        }
+        
         context.delete(trackerDto)
         saveContext()
-        fetch()
     }
     
 }

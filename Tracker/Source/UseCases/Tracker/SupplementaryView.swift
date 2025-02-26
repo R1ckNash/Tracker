@@ -15,6 +15,7 @@ final class SupplementaryView: UICollectionReusableView {
     
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .systemFont(ofSize: 19, weight: .bold)
         label.textColor = .black
         return label
@@ -26,7 +27,6 @@ final class SupplementaryView: UICollectionReusableView {
         super.init(frame: frame)
         
         addSubview(titleLabel)
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
             titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),

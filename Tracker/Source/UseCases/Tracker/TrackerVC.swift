@@ -18,18 +18,21 @@ final class TrackerVC: UIViewController {
     private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.backgroundColor = .white
         return collectionView
     }()
     
     private lazy var imageLabel: UIImageView = {
         let label = UIImageView()
+        label.translatesAutoresizingMaskIntoConstraints = false
         label.image = UIImage(named: "Mock")
         return label
     }()
     
     private lazy var textLabel: UILabel = {
         let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "mock.title".localized
         label.textColor = .black
         return label
@@ -37,6 +40,7 @@ final class TrackerVC: UIViewController {
     
     private lazy var datePicker: UIDatePicker = {
         let datePicker = UIDatePicker()
+        datePicker.translatesAutoresizingMaskIntoConstraints = false
         datePicker.datePickerMode = .date
         datePicker.preferredDatePickerStyle = .compact
         return datePicker
@@ -133,9 +137,6 @@ final class TrackerVC: UIViewController {
         view.addSubview(imageLabel)
         view.addSubview(textLabel)
         
-        imageLabel.translatesAutoresizingMaskIntoConstraints = false
-        textLabel.translatesAutoresizingMaskIntoConstraints = false
-        
         NSLayoutConstraint.activate([
             imageLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             imageLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
@@ -160,7 +161,6 @@ final class TrackerVC: UIViewController {
         collectionView.dataSource = self
         collectionView.delegate = self
         collectionView.allowsMultipleSelection = false
-        collectionView.translatesAutoresizingMaskIntoConstraints = false
         
         collectionView.register(
             TrackerCollectionViewCell.self,
@@ -243,6 +243,20 @@ extension TrackerVC: UICollectionViewDelegateFlowLayout {
     
     private func createEditAction(for tracker: Tracker) -> UIAction {
         return UIAction(title: "Edit") { [weak self] _ in
+            guard let self = self else { return }
+            let editVC = EditTrackerVC()
+            
+            if tracker.schedule.isEmpty {
+                editVC.trackerType = .event
+            } else {
+                editVC.trackerType = .habit
+            }
+            editVC.delegate = self
+            editVC.tracker = tracker
+            editVC.completedCount = dataProvider.getCompleteDaysCount(for: tracker.id)
+            editVC.categoryName = dataProvider.getTrackerCategoryName(by: tracker.id)
+            let navController = UINavigationController(rootViewController: editVC)
+            self.present(navController, animated: true)
         }
     }
     
@@ -330,13 +344,27 @@ extension TrackerVC: UICollectionViewDataSource {
 extension TrackerVC: NewTrackerDelegate {
     
     func didReceiveNewTracker(newTrackerCategory: TrackerCategory) {
-        if dataProvider.getTrackerCategory(by: newTrackerCategory.title) != nil {
-            dataProvider.updateTrackerCategory(title: newTrackerCategory.title, newTracker: newTrackerCategory.trackers[0])
+        
+        let tracker = newTrackerCategory.trackers[0]
+        if dataProvider.trackerExists(with: tracker.id) {
+            updateExistingTracker(tracker)
         } else {
-            dataProvider.createTrackerCategory(categoryTitle: newTrackerCategory.title)
-            dataProvider.updateTrackerCategory(title: newTrackerCategory.title, newTracker: newTrackerCategory.trackers[0])
+            createNewTracker(tracker, in: newTrackerCategory.title)
         }
         filterTrackers()
+    }
+    
+    private func updateExistingTracker(_ tracker: Tracker) {
+        dataProvider.updateTracker(tracker)
+    }
+    
+    private func createNewTracker(_ tracker: Tracker, in categoryTitle: String) {
+        if dataProvider.getTrackerCategory(by: categoryTitle) != nil {
+            dataProvider.updateTrackerCategory(title: categoryTitle, newTracker: tracker)
+        } else {
+            dataProvider.createTrackerCategory(categoryTitle: categoryTitle)
+            dataProvider.updateTrackerCategory(title: categoryTitle, newTracker: tracker)
+        }
     }
 }
 
@@ -353,7 +381,8 @@ extension TrackerVC: TrackerCellDelegate {
         if tracker.schedule.isEmpty {
             dataProvider.deleteTracker(by: id)
         }
-        collectionView.reloadData()
+        
+        filterTrackers()
     }
     
     func didCancelTracker(id: UUID) {
