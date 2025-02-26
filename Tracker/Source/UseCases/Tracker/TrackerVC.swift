@@ -78,7 +78,7 @@ final class TrackerVC: UIViewController {
         filterTrackers()
     }
     
-    private func filterTrackers() {
+    func filterTrackers() {
         let calendar = Calendar.current
         let weekdayIndex = (calendar.component(.weekday, from: currentDate) + 5) % 7
         let selectedWeekday = WeekDay(rawValue: weekdayIndex)
@@ -262,6 +262,18 @@ extension TrackerVC: UICollectionViewDelegateFlowLayout {
     
     private func createDeleteAction(for tracker: Tracker) -> UIAction {
         return UIAction(title: "Delete", attributes: .destructive) { [weak self] _ in
+            guard let self = self else { return }
+            let alert = UIAlertController(title: nil,
+                                          message: "Are you sure you want to delete tracker?",
+                                          preferredStyle: .actionSheet)
+            let deleteAction = UIAlertAction(title: "Delete", style: .destructive) { _ in
+                self.dataProvider.deleteTracker(by: tracker.id)
+                self.filterTrackers()
+            }
+            let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+            alert.addAction(deleteAction)
+            alert.addAction(cancelAction)
+            self.present(alert, animated: true, completion: nil)
         }
     }
     
@@ -381,7 +393,6 @@ extension TrackerVC: TrackerCellDelegate {
         if tracker.schedule.isEmpty {
             dataProvider.deleteTracker(by: id)
         }
-        
         filterTrackers()
     }
     

@@ -174,7 +174,6 @@ final class TrackerStore {
         if let categoryDto = trackerDto.category,
            categoryDto.trackers?.count == 1 {
             context.delete(categoryDto)
-            saveContext()
         }
         
         context.delete(trackerDto)
