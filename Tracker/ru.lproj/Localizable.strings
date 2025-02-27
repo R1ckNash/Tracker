@@ -1,0 +1,23 @@
+/* 
+  Localizable.strings
+  Tracker
+
+  Created by Ilia Liasin on 24/02/2025.
+  
+*/
+
+"search.placeholder" = "Поиск";
+"mock.title" = "Что будем отслеживать?";
+"trackerVC.navTitle" = "Трекеры";
+"statisticsVC.navTitle" = "Статистика";
+"scheduleVC.navTitle" = "Расписание";
+"filtersButton.title" = "Фильтры";
+"nothingFound" = "Ничего не найдено";
+
+"monday" = "Понедельник";
+"tuesday" = "Вторник";
+"wednesday" = "Среда";
+"thursday" = "Четверг";
+"friday" = "Пятница";
+"saturday" = "Суббота";
+"sunday" = "Воскресение";

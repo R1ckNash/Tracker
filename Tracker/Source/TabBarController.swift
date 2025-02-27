@@ -30,14 +30,14 @@ final class TabBarController: UITabBarController {
         let trackerVC = TrackerVC()
         let trackerNC = UINavigationController(rootViewController: trackerVC)
         trackerNC.navigationBar.prefersLargeTitles = true
-        trackerVC.tabBarItem = UITabBarItem(title: "Trackers",
+        trackerVC.tabBarItem = UITabBarItem(title: "trackerVC.navTitle".localized,
                                             image: .init(systemName: "record.circle.fill"),
                                             selectedImage: nil)
         
         let statisticVC = StatisticVC()
         let statisticNC = UINavigationController(rootViewController: statisticVC)
         statisticNC.navigationBar.prefersLargeTitles = true
-        statisticVC.tabBarItem = UITabBarItem(title: "Statistics",
+        statisticVC.tabBarItem = UITabBarItem(title: "statisticsVC.navTitle".localized,
                                               image: .init(systemName: "hare.fill"),
                                               selectedImage: nil)
         

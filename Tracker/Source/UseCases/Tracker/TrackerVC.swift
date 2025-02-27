@@ -56,7 +56,7 @@ final class TrackerVC: UIViewController {
     private lazy var nothingFoundLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Nothing found"
+        label.text = "nothingFound".localized
         label.textAlignment = .center
         label.font = .systemFont(ofSize: 12, weight: .medium)
         label.textColor = .black
@@ -76,7 +76,7 @@ final class TrackerVC: UIViewController {
         let button = UIButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.backgroundColor = .systemBlue
-        button.setTitle("Filters", for: .normal)
+        button.setTitle("filtersButton.title".localized, for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 17, weight: .regular)
         button.setTitleColor(.white, for: .normal)
         button.layer.cornerRadius = 16

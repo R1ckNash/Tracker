@@ -9,7 +9,10 @@
 "search.placeholder" = "Search";
 "mock.title" = "What are we going to track?";
 "trackerVC.navTitle" = "Trackers";
+"statisticsVC.navTitle" = "Statistics";
 "scheduleVC.navTitle" = "Schedule";
+"filtersButton.title" = "Filters";
+"nothingFound" = "Nothing found";
 
 "monday" = "Monday";
 "tuesday" = "Tuesday";
