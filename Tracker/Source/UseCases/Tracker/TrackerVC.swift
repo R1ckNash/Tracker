@@ -11,6 +11,13 @@ protocol NewTrackerDelegate: AnyObject {
     func didReceiveNewTracker(newTrackerCategory: TrackerCategory)
 }
 
+enum FilterType: Int {
+    case allTrackers = 0
+    case trackersForToday = 1
+    case completed = 2
+    case notCompleted = 3
+}
+
 final class TrackerVC: UIViewController {
     
     // MARK: - UI Elements
@@ -20,6 +27,14 @@ final class TrackerVC: UIViewController {
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.backgroundColor = .white
+        collectionView.showsVerticalScrollIndicator = false
+        collectionView.register(
+            TrackerCollectionViewCell.self,
+            forCellWithReuseIdentifier: TrackerCollectionViewCell.reuseIdentifier)
+        collectionView.register(
+            SupplementaryView.self,
+            forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+            withReuseIdentifier: SupplementaryView.reuseIdentifier)
         return collectionView
     }()
     
@@ -38,6 +53,18 @@ final class TrackerVC: UIViewController {
         return label
     }()
     
+    private lazy var filtersButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.backgroundColor = .systemBlue
+        button.setTitle("Filters", for: .normal)
+        button.titleLabel?.font = .systemFont(ofSize: 17, weight: .regular)
+        button.setTitleColor(.white, for: .normal)
+        button.layer.cornerRadius = 16
+        button.addTarget(self, action: #selector(filtersButtonPressed), for: .touchUpInside)
+        return button
+    }()
+
     private lazy var datePicker: UIDatePicker = {
         let datePicker = UIDatePicker()
         datePicker.translatesAutoresizingMaskIntoConstraints = false
@@ -54,16 +81,39 @@ final class TrackerVC: UIViewController {
         return DIContainer.shared.makeDataProvider()
     }()
     
+    private var currentFilter: FilterType = .allTrackers
+    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        setupNavBar()
+        setupSearchController()
         configureUI()
         datePickerValueChanged()
     }
     
     // MARK: - Private Methods
+    
+    @objc private func filtersButtonPressed() {
+        let filtersVC = FiltersVC()
+        filtersVC.selectedIndex = currentFilter.rawValue
+        filtersVC.onFilterSelected = { [weak self] selectedIndex in
+            guard let self = self else { return }
+            self.currentFilter = FilterType(rawValue: selectedIndex) ?? .allTrackers
+            self.applyFilter(self.currentFilter)
+        }
+        let navController = UINavigationController(rootViewController: filtersVC)
+        present(navController, animated: true)
+    }
+    
+    private func applyFilter(_ filter: FilterType) {
+        dataProvider.applyFilter(filter, for: currentDate) { [weak self] in
+            self?.collectionView.reloadData()
+            self?.showMockScreen(self?.dataProvider.getNumberOfSections() == 0)
+        }
+    }
     
     @objc private func addButtonTapped() {
         let addTrackerViewController = NewTrackerVC()
@@ -78,15 +128,16 @@ final class TrackerVC: UIViewController {
         filterTrackers()
     }
     
-    func filterTrackers() {
+    private func filterTrackers() {
         let calendar = Calendar.current
         let weekdayIndex = (calendar.component(.weekday, from: currentDate) + 5) % 7
         let selectedWeekday = WeekDay(rawValue: weekdayIndex)
+        guard let selectedWeekday = selectedWeekday else { return }
         
-        dataProvider.performFetchByDay(for: selectedWeekday?.fullName ?? "")
-        
+        dataProvider.performFetchByDay(for: selectedWeekday.fullName)
+        dataProvider.loadCategories()
+        applyFilter(currentFilter)
         showMockScreen(dataProvider.getNumberOfSections() == 0)
-        collectionView.reloadData()
     }
     
     private func isTrackerCompleted(id: UUID) -> Bool {
@@ -94,15 +145,7 @@ final class TrackerVC: UIViewController {
         return result
     }
     
-    private func configureUI() {
-        setupNavBar()
-        setupSearchController()
-        setupCollectionView()
-        setupMockScreen()
-    }
-    
     private func setupNavBar() {
-        
         navigationItem.title = "trackerVC.navTitle".localized
         
         let addButton = UIBarButtonItem(
@@ -132,10 +175,16 @@ final class TrackerVC: UIViewController {
         searchController.searchResultsUpdater = self
     }
     
-    private func setupMockScreen() {
+    private func configureUI() {
         
+        view.addSubview(collectionView)
         view.addSubview(imageLabel)
         view.addSubview(textLabel)
+        view.addSubview(filtersButton)
+        
+        collectionView.dataSource = self
+        collectionView.delegate = self
+        collectionView.allowsMultipleSelection = false
         
         NSLayoutConstraint.activate([
             imageLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
@@ -144,7 +193,17 @@ final class TrackerVC: UIViewController {
             imageLabel.heightAnchor.constraint(equalToConstant: 80),
             
             textLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            textLabel.topAnchor.constraint(equalTo: imageLabel.bottomAnchor, constant: 8)
+            textLabel.topAnchor.constraint(equalTo: imageLabel.bottomAnchor, constant: 8),
+            
+            collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            collectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            collectionView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+            
+            filtersButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            filtersButton.heightAnchor.constraint(equalToConstant: 50),
+            filtersButton.widthAnchor.constraint(equalToConstant: 114),
+            filtersButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
         ])
     }
     
@@ -153,31 +212,7 @@ final class TrackerVC: UIViewController {
         imageLabel.isHidden = !bool
         textLabel.isHidden = !bool
         collectionView.isHidden = bool
-    }
-    
-    private func setupCollectionView() {
-        
-        view.addSubview(collectionView)
-        collectionView.dataSource = self
-        collectionView.delegate = self
-        collectionView.allowsMultipleSelection = false
-        
-        collectionView.register(
-            TrackerCollectionViewCell.self,
-            forCellWithReuseIdentifier: TrackerCollectionViewCell.reuseIdentifier)
-        
-        collectionView.register(
-            SupplementaryView.self,
-            forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
-            withReuseIdentifier: SupplementaryView.reuseIdentifier)
-        
-        NSLayoutConstraint.activate([
-            collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            collectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
-            collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            collectionView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16)
-        ])
-        
+        filtersButton.isHidden = bool
     }
     
 }

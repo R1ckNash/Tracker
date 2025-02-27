@@ -33,6 +33,45 @@ final class DataProvider: NSObject {
     
     // MARK: - Public Methods
     
+    func applyFilter(_ filter: FilterType, for date: Date, completion: (() -> Void)? = nil) {
+        let calendar = Calendar.current
+        let weekdayIndex = (calendar.component(.weekday, from: date) + 5) % 7
+        guard let selectedWeekday = WeekDay(rawValue: weekdayIndex) else {
+            completion?()
+            return
+        }
+        
+        performFetchByDay(for: selectedWeekday.fullName)
+        loadCategories()
+        
+        switch filter {
+            
+        case .allTrackers, .trackersForToday:
+            break
+            
+        case .completed:
+            visibleCategories = categories
+                .map { category in
+                    let filteredTrackers = category.trackers.filter { tracker in
+                        return trackerRecordStore.isRecordExist(for: tracker.id, on: date)
+                    }
+                    return TrackerCategory(title: category.title, trackers: filteredTrackers)
+                }
+                .filter { !$0.trackers.isEmpty }
+            
+        case .notCompleted:
+            visibleCategories = categories
+                .map { category in
+                    let filteredTrackers = category.trackers.filter { tracker in
+                        return !trackerRecordStore.isRecordExist(for: tracker.id, on: date)
+                    }
+                    return TrackerCategory(title: category.title, trackers: filteredTrackers)
+                }
+                .filter { !$0.trackers.isEmpty }
+        }
+        completion?()
+    }
+    
     func performFetchByDay(for dayOfWeek: String) {
         trackerStore.performFetchByDay(for: dayOfWeek)
         loadCategories()
