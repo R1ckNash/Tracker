@@ -18,20 +18,22 @@ final class NewTrackerVC: UIViewController {
     
     private lazy var habitButton: UIButton = {
         let button = UIButton(type: .system)
+        button.translatesAutoresizingMaskIntoConstraints = false
         button.setTitle("Habit", for: .normal)
         button.layer.cornerRadius = 16
-        button.backgroundColor = .black
-        button.setTitleColor(.white, for: .normal)
+        button.backgroundColor = .label
+        button.setTitleColor(.systemBackground, for: .normal)
         button.addTarget(self, action: #selector(habitButtonPressed), for: .touchUpInside)
         return button
     }()
     
     private lazy var eventButton: UIButton = {
         let button = UIButton(type: .system)
+        button.translatesAutoresizingMaskIntoConstraints = false
         button.setTitle("Event", for: .normal)
         button.layer.cornerRadius = 16
-        button.backgroundColor = .black
-        button.setTitleColor(.white, for: .normal)
+        button.backgroundColor = .label
+        button.setTitleColor(.systemBackground, for: .normal)
         button.addTarget(self, action: #selector(eventButtonPressed), for: .touchUpInside)
         return button
     }()
@@ -51,14 +53,14 @@ final class NewTrackerVC: UIViewController {
     
     @objc private func habitButtonPressed() {
         let trackerDetailsVC = NewTrackerDetailsVC()
-        trackerDetailsVC.newTrackerType = .habit
+        trackerDetailsVC.trackerType = .habit
         trackerDetailsVC.delegate = delegate
         navigationController?.pushViewController(trackerDetailsVC, animated: true)
     }
     
     @objc private func eventButtonPressed() {
         let trackerDetailsVC = NewTrackerDetailsVC()
-        trackerDetailsVC.newTrackerType = .event
+        trackerDetailsVC.trackerType = .event
         trackerDetailsVC.delegate = delegate
         navigationController?.pushViewController(trackerDetailsVC, animated: true)
     }
@@ -66,13 +68,11 @@ final class NewTrackerVC: UIViewController {
     private func configureUI() {
         
         navigationItem.title = "Creating a tracker"
-        view.backgroundColor = .white
+        navigationItem.titleView?.tintColor = .label
+        view.backgroundColor = .systemBackground
         
         view.addSubview(habitButton)
         view.addSubview(eventButton)
-        
-        habitButton.translatesAutoresizingMaskIntoConstraints = false
-        eventButton.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
             habitButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),

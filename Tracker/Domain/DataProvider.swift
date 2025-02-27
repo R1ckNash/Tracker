@@ -12,6 +12,9 @@ final class DataProvider: NSObject {
     
     // MARK: - Private Properties
     
+    private var categories: [TrackerCategory] = []
+    private var visibleCategories: [TrackerCategory] = []
+    
     private let trackerStore: TrackerStore
     private let trackerCategoryStore: TrackerCategoryStore
     private let trackerRecordStore: TrackerRecordStore
@@ -30,26 +33,109 @@ final class DataProvider: NSObject {
     
     // MARK: - Public Methods
     
+    func applyFilter(_ filter: FilterType, for date: Date, completion: (() -> Void)? = nil) {
+        let calendar = Calendar.current
+        let weekdayIndex = (calendar.component(.weekday, from: date) + 5) % 7
+        guard let selectedWeekday = WeekDay(rawValue: weekdayIndex) else {
+            completion?()
+            return
+        }
+        
+        performFetchByDay(for: selectedWeekday.fullName)
+        loadCategories()
+        
+        switch filter {
+            
+        case .allTrackers, .trackersForToday:
+            break
+            
+        case .completed:
+            visibleCategories = categories
+                .map { category in
+                    let filteredTrackers = category.trackers.filter { tracker in
+                        return trackerRecordStore.isRecordExist(for: tracker.id, on: date)
+                    }
+                    return TrackerCategory(title: category.title, trackers: filteredTrackers)
+                }
+                .filter { !$0.trackers.isEmpty }
+            
+        case .notCompleted:
+            visibleCategories = categories
+                .map { category in
+                    let filteredTrackers = category.trackers.filter { tracker in
+                        return !trackerRecordStore.isRecordExist(for: tracker.id, on: date)
+                    }
+                    return TrackerCategory(title: category.title, trackers: filteredTrackers)
+                }
+                .filter { !$0.trackers.isEmpty }
+        }
+        completion?()
+    }
+    
     func performFetchByDay(for dayOfWeek: String) {
         trackerStore.performFetchByDay(for: dayOfWeek)
+        loadCategories()
+    }
+    
+    func loadCategories() {
+        categories = trackerCategoryStore.fetchAllCategories()
+        visibleCategories = categories
+    }
+    
+    func filterCategories(with searchText: String?) {
+        guard let text = searchText, !text.isEmpty else {
+            visibleCategories = categories
+            return
+        }
+        
+        visibleCategories = categories.compactMap { category in
+            let filteredTrackers = category.trackers.filter { tracker in
+                tracker.name.lowercased().contains(text.lowercased())
+            }
+            return filteredTrackers.isEmpty ? nil : TrackerCategory(title: category.title, trackers: filteredTrackers)
+        }
     }
     
     func getNumberOfSections() -> Int {
-        trackerStore.getNumberOfSections()
+        visibleCategories.count
     }
     
     func getNumberOfItems(inSection section: Int) -> Int {
-        trackerStore.getNumberOfItems(inSection: section)
+        visibleCategories[section].trackers.count
     }
     
     func category(for sectionIndex: Int) -> String? {
-        trackerStore.category(for: sectionIndex)
+        visibleCategories[sectionIndex].title
+    }
+    
+    // MARK: - Pin
+    
+    func isTrackerPinned(for id: UUID) -> Bool {
+        guard let pinnedCategory = getTrackerCategory(by: Constants.pinned) else { return false }
+        return pinnedCategory.trackers.contains(where: { $0.id == id })
+    }
+    
+    func pinTracker(with id: UUID) {
+        let tracker = getTracker(by: id)
+        trackerCategoryStore.addTrackerToPinned(tracker)
+    }
+    
+    func unpinTracker(with id: UUID) {
+        trackerCategoryStore.removeTrackerFromPinned(with: id)
     }
     
     // MARK: - Tracker Methods
     
     func createTracker(tracker: Tracker) -> Tracker {
         trackerStore.createTracker(tracker)
+    }
+    
+    func updateTracker(_ tracker: Tracker) {
+        trackerStore.updateTracker(tracker)
+    }
+    
+    func trackerExists(with id: UUID) -> Bool {
+        trackerStore.fetchTracker(by: id) != nil
     }
     
     func getTracker(by id: UUID) -> Tracker {
@@ -60,12 +146,19 @@ final class DataProvider: NSObject {
         return tracker
     }
     
+    func getTrackerCategoryName(by id: UUID) -> String {
+        guard let categoryName = trackerStore.getTrackerCategoryName(by: id) else {
+            fatalError("Tracker category not found")
+        }
+        return categoryName
+    }
+    
     func deleteTracker(by id: UUID) {
         trackerStore.deleteTracker(by: id)
     }
     
     func getTracker(at indexPath: IndexPath) -> Tracker {
-        trackerStore.fetchTracker(at: indexPath)
+        visibleCategories[indexPath.section].trackers[indexPath.item]
     }
     
     // MARK: - Tracker Category Methods
@@ -87,6 +180,10 @@ final class DataProvider: NSObject {
     }
     
     // MARK: - Record Methods
+    
+    func getTotalCompletedCount() -> Int {
+        return trackerRecordStore.getTotalCompletedTrackersCount()
+    }
     
     func createRecord(with id: UUID, for date: Date) {
         trackerRecordStore.createRecord(for: id, on: date)
