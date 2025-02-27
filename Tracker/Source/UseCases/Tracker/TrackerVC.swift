@@ -53,6 +53,25 @@ final class TrackerVC: UIViewController {
         return label
     }()
     
+    private lazy var nothingFoundLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.text = "Nothing found"
+        label.textAlignment = .center
+        label.font = .systemFont(ofSize: 12, weight: .medium)
+        label.textColor = .black
+        label.isHidden = true
+        return label
+    }()
+    
+    private lazy var nothingFoundImage: UIImageView = {
+        let label = UIImageView()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.image = UIImage(named: "notFoundImage")
+        label.isHidden = true
+        return label
+    }()
+    
     private lazy var filtersButton: UIButton = {
         let button = UIButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -180,6 +199,8 @@ final class TrackerVC: UIViewController {
         view.addSubview(collectionView)
         view.addSubview(imageLabel)
         view.addSubview(textLabel)
+        view.addSubview(nothingFoundLabel)
+        view.addSubview(nothingFoundImage)
         view.addSubview(filtersButton)
         
         collectionView.dataSource = self
@@ -194,6 +215,12 @@ final class TrackerVC: UIViewController {
             
             textLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             textLabel.topAnchor.constraint(equalTo: imageLabel.bottomAnchor, constant: 8),
+            
+            nothingFoundImage.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            nothingFoundImage.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -246),
+            
+            nothingFoundLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            nothingFoundLabel.centerYAnchor.constraint(equalTo: nothingFoundImage.bottomAnchor, constant: 8),
             
             collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             collectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
@@ -447,5 +474,15 @@ extension TrackerVC: UISearchResultsUpdating {
         let searchText = searchController.searchBar.text
         dataProvider.filterCategories(with: searchText)
         collectionView.reloadData()
+        
+        if dataProvider.getNumberOfSections() == 0 && !(searchText?.isEmpty ?? true) {
+            nothingFoundLabel.isHidden = false
+            nothingFoundImage.isHidden = false
+            filtersButton.isHidden = true
+        } else {
+            nothingFoundLabel.isHidden = true
+            nothingFoundImage.isHidden = true
+            filtersButton.isHidden = false
+        }
     }
 }
