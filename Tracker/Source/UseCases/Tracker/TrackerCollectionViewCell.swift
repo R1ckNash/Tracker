@@ -60,7 +60,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .systemFont(ofSize: 12, weight: .medium)
-        label.textColor = .black
+        label.textColor = .label
         return label
     }()
     
@@ -68,7 +68,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setImage(.init(systemName: "plus"), for: .normal)
-        button.tintColor = .white
+        button.tintColor = .systemBackground
         button.layer.cornerRadius = 17
         button.layer.masksToBounds = true
         button.addTarget(self, action: #selector(toggleTracker), for: .touchUpInside)
@@ -92,7 +92,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     override init(frame: CGRect) {
         super.init(frame: frame)
         
-        contentView.backgroundColor = .white
+        contentView.backgroundColor = .systemBackground
         
         contentView.addSubview(previewContainerView)
         previewContainerView.addSubview(emojiLabel)

@@ -21,8 +21,8 @@ final class NewTrackerVC: UIViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setTitle("Habit", for: .normal)
         button.layer.cornerRadius = 16
-        button.backgroundColor = .black
-        button.setTitleColor(.white, for: .normal)
+        button.backgroundColor = .label
+        button.setTitleColor(.systemBackground, for: .normal)
         button.addTarget(self, action: #selector(habitButtonPressed), for: .touchUpInside)
         return button
     }()
@@ -32,8 +32,8 @@ final class NewTrackerVC: UIViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setTitle("Event", for: .normal)
         button.layer.cornerRadius = 16
-        button.backgroundColor = .black
-        button.setTitleColor(.white, for: .normal)
+        button.backgroundColor = .label
+        button.setTitleColor(.systemBackground, for: .normal)
         button.addTarget(self, action: #selector(eventButtonPressed), for: .touchUpInside)
         return button
     }()
@@ -68,7 +68,8 @@ final class NewTrackerVC: UIViewController {
     private func configureUI() {
         
         navigationItem.title = "Creating a tracker"
-        view.backgroundColor = .white
+        navigationItem.titleView?.tintColor = .label
+        view.backgroundColor = .systemBackground
         
         view.addSubview(habitButton)
         view.addSubview(eventButton)

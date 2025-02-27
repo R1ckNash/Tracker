@@ -26,7 +26,7 @@ final class TrackerVC: UIViewController {
         let layout = UICollectionViewFlowLayout()
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.translatesAutoresizingMaskIntoConstraints = false
-        collectionView.backgroundColor = .white
+        collectionView.backgroundColor = .systemBackground
         collectionView.showsVerticalScrollIndicator = false
         collectionView.register(
             TrackerCollectionViewCell.self,
@@ -49,7 +49,7 @@ final class TrackerVC: UIViewController {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "mock.title".localized
-        label.textColor = .black
+        label.textColor = .label
         return label
     }()
     
@@ -89,6 +89,10 @@ final class TrackerVC: UIViewController {
         datePicker.translatesAutoresizingMaskIntoConstraints = false
         datePicker.datePickerMode = .date
         datePicker.preferredDatePickerStyle = .compact
+        datePicker.backgroundColor = .systemGray5
+        datePicker.overrideUserInterfaceStyle = .light
+        datePicker.layer.cornerRadius = 8
+        datePicker.clipsToBounds = true
         return datePicker
     }()
     
@@ -98,6 +102,10 @@ final class TrackerVC: UIViewController {
     
     private lazy var dataProvider: DataProvider = {
         return DIContainer.shared.makeDataProvider()
+    }()
+    
+    private lazy var analyticsService: AnalyticsService = {
+        return DIContainer.shared.makeAnalyticsService()
     }()
     
     private var currentFilter: FilterType = .allTrackers
@@ -113,9 +121,20 @@ final class TrackerVC: UIViewController {
         datePickerValueChanged()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        analyticsService.report(event: .open)
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        analyticsService.report(event: .close)
+    }
+    
     // MARK: - Private Methods
     
     @objc private func filtersButtonPressed() {
+        analyticsService.report(event: .click, item: .filter)
         let filtersVC = FiltersVC()
         filtersVC.selectedIndex = currentFilter.rawValue
         filtersVC.onFilterSelected = { [weak self] selectedIndex in
@@ -135,6 +154,7 @@ final class TrackerVC: UIViewController {
     }
     
     @objc private func addButtonTapped() {
+        analyticsService.report(event: .click, item: .addTrack)
         let addTrackerViewController = NewTrackerVC()
         addTrackerViewController.delegate = self
         let navController = UINavigationController(rootViewController: addTrackerViewController)
@@ -172,7 +192,7 @@ final class TrackerVC: UIViewController {
             target: self,
             action: #selector(addButtonTapped))
         
-        addButton.tintColor = .black
+        addButton.tintColor = .label
         
         let calendar = Calendar.current
         let minDate = calendar.date(byAdding: .year, value: -10, to: currentDate)
@@ -248,6 +268,10 @@ final class TrackerVC: UIViewController {
 
 extension TrackerVC: UICollectionViewDelegateFlowLayout {
     
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        analyticsService.report(event: .click, item: .track)
+    }
+    
     func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,
                         insetForSectionAt section: Int) -> UIEdgeInsets {
@@ -306,6 +330,7 @@ extension TrackerVC: UICollectionViewDelegateFlowLayout {
     private func createEditAction(for tracker: Tracker) -> UIAction {
         return UIAction(title: "Edit") { [weak self] _ in
             guard let self = self else { return }
+            analyticsService.report(event: .click, item: .edit)
             let editVC = EditTrackerVC()
             
             if tracker.schedule.isEmpty {
@@ -325,6 +350,7 @@ extension TrackerVC: UICollectionViewDelegateFlowLayout {
     private func createDeleteAction(for tracker: Tracker) -> UIAction {
         return UIAction(title: "Delete", attributes: .destructive) { [weak self] _ in
             guard let self = self else { return }
+            analyticsService.report(event: .click, item: .delete)
             let alert = UIAlertController(title: nil,
                                           message: "Are you sure you want to delete tracker?",
                                           preferredStyle: .actionSheet)

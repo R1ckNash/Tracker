@@ -72,12 +72,14 @@ class BaseTrackerDetailsVC: UIViewController {
     private lazy var scrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.backgroundColor = .systemBackground
         return scrollView
     }()
     
     lazy var contentView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .systemBackground
         return view
     }()
     
@@ -232,7 +234,8 @@ class BaseTrackerDetailsVC: UIViewController {
     
     func configureUI() {
         
-        view.backgroundColor = .white
+        view.backgroundColor = .systemBackground
+        navigationItem.titleView?.tintColor = .label
         navigationItem.hidesBackButton = true
         
         view.addSubview(scrollView)

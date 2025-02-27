@@ -69,4 +69,8 @@ final class DIContainer {
         ScheduleVC()
     }
     
+    func makeAnalyticsService() -> AnalyticsService {
+        AnalyticsService.shared
+    }
+    
 }
