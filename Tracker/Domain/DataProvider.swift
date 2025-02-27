@@ -181,6 +181,10 @@ final class DataProvider: NSObject {
     
     // MARK: - Record Methods
     
+    func getTotalCompletedCount() -> Int {
+        return trackerRecordStore.getTotalCompletedTrackersCount()
+    }
+    
     func createRecord(with id: UUID, for date: Date) {
         trackerRecordStore.createRecord(for: id, on: date)
     }

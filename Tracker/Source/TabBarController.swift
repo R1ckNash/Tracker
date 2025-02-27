@@ -36,6 +36,7 @@ final class TabBarController: UITabBarController {
         
         let statisticVC = StatisticVC()
         let statisticNC = UINavigationController(rootViewController: statisticVC)
+        statisticNC.navigationBar.prefersLargeTitles = true
         statisticVC.tabBarItem = UITabBarItem(title: "Statistics",
                                               image: .init(systemName: "hare.fill"),
                                               selectedImage: nil)

@@ -73,4 +73,8 @@ final class DIContainer {
         AnalyticsService.shared
     }
     
+    func makeUserDefaultsService() -> UserDefaultsService {
+        UserDefaultsService.shared
+    }
+    
 }

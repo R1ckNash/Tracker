@@ -47,6 +47,16 @@ final class TrackerRecordStore {
     
     // MARK: - Public Methods
     
+    func getTotalCompletedTrackersCount() -> Int {
+        let fetchRequest: NSFetchRequest<TrackerRecordCD> = TrackerRecordCD.fetchRequest()
+        do {
+            return try context.count(for: fetchRequest)
+        } catch {
+            print("Error counting tracker records: \(error)")
+            return 0
+        }
+    }
+    
     func createRecord(for trackerId: UUID, on date: Date) {
         guard let trackerDTO = fetchTrackerDTO(by: trackerId) else {
             print("Error: Tracker with id \(trackerId) not found.")

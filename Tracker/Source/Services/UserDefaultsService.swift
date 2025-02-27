@@ -26,4 +26,5 @@ final class UserDefaultsService {
     func isOnboardingCompleted() -> Bool {
         dataStorage.bool(forKey: "isOnboardingCompleted")
     }
+
 }
