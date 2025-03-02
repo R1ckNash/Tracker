@@ -76,7 +76,7 @@ final class TrackerCategoryStore {
             try context.save()
         } catch {
             let nserror = error as NSError
-            fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+            assertionFailure("Unresolved error \(nserror), \(nserror.userInfo)")
         }
     }
     
@@ -88,6 +88,29 @@ final class TrackerCategoryStore {
         saveContext()
     }
     
+    func addTrackerToPinned(_ tracker: Tracker) {
+        if fetchTrackerCategory(by: Constants.pinned) == nil {
+            createTrackerCategory(withTitle: Constants.pinned)
+        }
+        updateTrackerCategory(withTitle: Constants.pinned, adding: tracker)
+    }
+    
+    func removeTrackerFromPinned(with id: UUID) {
+        guard let pinnedDTO = fetchTrackerCategoryDTO(by: Constants.pinned) else { return }
+        if let trackers = pinnedDTO.trackers as? Set<TrackerCD> {
+            for tracker in trackers where tracker.id == id {
+                pinnedDTO.removeFromTrackers(tracker)
+                break
+            }
+        }
+        saveContext()
+        
+        if let count = pinnedDTO.trackers?.count, count == 0 {
+            context.delete(pinnedDTO)
+            saveContext()
+        }
+    }
+    
     func updateTrackerCategory(withTitle title: String, adding newTracker: Tracker) {
         guard let trackerCategoryDTO = fetchTrackerCategoryDTO(by: title) else {
             print("Tracker category with title \(title) not found.")
@@ -97,6 +120,38 @@ final class TrackerCategoryStore {
         let newTrackerDTO = createTrackerDTO(newTracker)
         trackerCategoryDTO.addToTrackers(newTrackerDTO)
         saveContext()
+    }
+    
+    func fetchAllCategories() -> [TrackerCategory] {
+        let fetchRequest: NSFetchRequest<TrackerCategoryCD> = TrackerCategoryCD.fetchRequest()
+        do {
+            let dtos = try context.fetch(fetchRequest)
+            var categories = dtos.map { mapDtoToTrackerCategory($0) }
+            
+            if let pinnedIndex = categories.firstIndex(where: { $0.title == Constants.pinned }) {
+                let pinnedCategory = categories[pinnedIndex]
+                let pinnedTrackerIds = Set(pinnedCategory.trackers.map { $0.id })
+                
+                categories = categories.map { category in
+                    if category.title != Constants.pinned {
+                        let filteredTrackers = category.trackers.filter { !pinnedTrackerIds.contains($0.id) }
+                        return TrackerCategory(title: category.title, trackers: filteredTrackers)
+                    } else {
+                        return category
+                    }
+                }
+                
+                if let index = categories.firstIndex(where: { $0.title == Constants.pinned }) {
+                    let pinned = categories.remove(at: index)
+                    categories.insert(pinned, at: 0)
+                }
+            }
+            
+            return categories
+        } catch {
+            print("Error fetching all categories: \(error)")
+            return []
+        }
     }
     
     func getAllCategoryTitles() -> [String] {

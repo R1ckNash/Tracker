@@ -23,11 +23,12 @@ final class DIContainer {
     
     // MARK: - Initializers
     
-    init() {
+    private init() {
+        
         persistentContainer = NSPersistentContainer(name: "TrackerModel")
         persistentContainer.loadPersistentStores { storeDescription, error in
             if let error = error as NSError? {
-                fatalError("Failed to load persistent stores: \(error)")
+                assertionFailure("Failed to load persistent stores: \(error)")
             }
         }
         
@@ -67,6 +68,14 @@ final class DIContainer {
     
     func makeScheduleVC() -> ScheduleVC {
         ScheduleVC()
+    }
+    
+    func makeAnalyticsService() -> AnalyticsService {
+        AnalyticsService.shared
+    }
+    
+    func makeUserDefaultsService() -> UserDefaultsService {
+        UserDefaultsService.shared
     }
     
 }

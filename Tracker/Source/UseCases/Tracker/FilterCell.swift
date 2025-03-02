@@ -1,14 +1,14 @@
 //
-//  CategoryCell.swift
+//  FilterCell.swift
 //  Tracker
 //
-//  Created by Ilia Liasin on 24/02/2025.
+//  Created by Ilia Liasin on 26/02/2025.
 //
 
 import UIKit
 
-final class CategoryCell: UITableViewCell {
-    
+final class FilterCell: UITableViewCell {
+
     // MARK: - UI Elements
     
     private lazy var checkmarkImageView: UIImageView = {
@@ -23,7 +23,7 @@ final class CategoryCell: UITableViewCell {
     
     // MARK: - Public Properties
 
-    static let identifier = "CategoryCell"
+    static let identifier = "FilterCell"
     
     // MARK: - Initializers
     

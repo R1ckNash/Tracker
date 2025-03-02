@@ -28,7 +28,7 @@ final class TrackerRecordStore {
             try context.save()
         } catch {
             let nserror = error as NSError
-            fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+            assertionFailure("Unresolved error \(nserror), \(nserror.userInfo)")
         }
     }
     
@@ -46,6 +46,16 @@ final class TrackerRecordStore {
     }
     
     // MARK: - Public Methods
+    
+    func getTotalCompletedTrackersCount() -> Int {
+        let fetchRequest: NSFetchRequest<TrackerRecordCD> = TrackerRecordCD.fetchRequest()
+        do {
+            return try context.count(for: fetchRequest)
+        } catch {
+            print("Error counting tracker records: \(error)")
+            return 0
+        }
+    }
     
     func createRecord(for trackerId: UUID, on date: Date) {
         guard let trackerDTO = fetchTrackerDTO(by: trackerId) else {

@@ -40,6 +40,9 @@ final class OnboardingPageVC: UIViewController {
     
     private var textTitle: String
     private var image: UIImage
+    private lazy var userDefaultsService: UserDefaultsService = {
+        DIContainer.shared.makeUserDefaultsService()
+    }()
     
     // MARK: - Public Properties
     
@@ -99,7 +102,7 @@ final class OnboardingPageVC: UIViewController {
     
     
     @objc private func closeButtonPressed() {
-        UserDefaultsService.shared.setOnboardingCompleted()
+        userDefaultsService.setOnboardingCompleted()
         onClose?()
     }
     

@@ -35,8 +35,6 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             }
             window.rootViewController = onboardingVC
         }
-        
-        window.overrideUserInterfaceStyle = .light
         window.makeKeyAndVisible()
     }
     
