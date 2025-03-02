@@ -10,12 +10,12 @@ import CoreData
 import AppMetricaCore
 
 @main
-class AppDelegate: UIResponder, UIApplicationDelegate {
+final class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
-        let configuration = AppMetricaConfiguration(apiKey: "36124f65-04b9-4db4-bb06-eb9c59c49e9d")
-        AppMetrica.activate(with: configuration!)
+        guard let configuration = AppMetricaConfiguration(apiKey: Constants.apiKey) else { return false }
+        AppMetrica.activate(with: configuration)
         
         return true
     }

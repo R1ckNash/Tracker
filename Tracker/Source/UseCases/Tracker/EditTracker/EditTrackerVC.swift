@@ -34,7 +34,10 @@ final class EditTrackerVC: BaseTrackerDetailsVC {
             let tracker,
             let completedCount = completedCount,
             let categoryName = categoryName
-        else { return }
+        else {
+            assertionFailure("Data can't be populated")
+            return
+        }
         
         setTitleText(tracker.name)
         chosenTitle = tracker.name

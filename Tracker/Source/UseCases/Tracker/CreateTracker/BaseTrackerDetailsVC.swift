@@ -219,7 +219,7 @@ class BaseTrackerDetailsVC: UIViewController {
     @objc func createButtonPressed() {}
     
     func updateCreateButtonState() {
-        let isFormValid = !(chosenTitle.isEmpty)
+        let isFormValid = !chosenTitle.isEmpty
         createButton.isEnabled = isFormValid
         createButton.backgroundColor = isFormValid ? .black : .gray
     }

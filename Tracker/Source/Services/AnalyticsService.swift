@@ -27,6 +27,10 @@ final class AnalyticsService {
     
     static let shared = AnalyticsService()
     
+    // MARK: - Initializers
+    
+    private init() {}
+    
     // MARK: - Public Methods
     
     func report(event: AnalyticsEvent, item: AnalyticsItem? = nil, screen: String = "TrackerVC") {

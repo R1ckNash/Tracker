@@ -17,6 +17,10 @@ final class UserDefaultsService {
     
     private let dataStorage = UserDefaults.standard
     
+    // MARK: - Initializers
+    
+    private init() {}
+    
     // MARK: - Public Methods
     
     func setOnboardingCompleted() {

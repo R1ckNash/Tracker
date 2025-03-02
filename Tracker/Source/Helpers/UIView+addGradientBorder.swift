@@ -10,7 +10,7 @@ import UIKit
 extension UIView {
     
     func addGradientBorder() {
-        self.layer.sublayers?.filter { $0.name == "gradientBorder" }.forEach { $0.removeFromSuperlayer() }
+        layer.sublayers?.filter { $0.name == "gradientBorder" }.forEach { $0.removeFromSuperlayer() }
         
         let gradient = CAGradientLayer.gradientBorderLayer(in: self.bounds)
         gradient.name = "gradientBorder"
@@ -23,6 +23,6 @@ extension UIView {
         shape.strokeColor = UIColor.black.cgColor
         
         gradient.mask = shape
-        self.layer.addSublayer(gradient)
+        layer.addSublayer(gradient)
     }
 }

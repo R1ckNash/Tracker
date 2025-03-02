@@ -59,7 +59,7 @@ final class StatisticVC: UIViewController {
     // MARK: - Private Properties
     
     private lazy var dataProvider: DataProvider = {
-        return DIContainer.shared.makeDataProvider()
+        DIContainer.shared.makeDataProvider()
     }()
     
     // MARK: - Life cycle
@@ -87,15 +87,12 @@ final class StatisticVC: UIViewController {
     private func updateStatistics() {
         let count = dataProvider.getTotalCompletedCount()
         
-        if count == 0 {
-            statisticViewContainer.isHidden = true
-            nothingAnalyzeLabel.isHidden = false
-            nothingAnalyzeImage.isHidden = false
-        } else {
-            statisticViewContainer.isHidden = false
-            nothingAnalyzeLabel.isHidden = true
-            nothingAnalyzeImage.isHidden = true
-            countLabel.text = "\(count)"
+        let isEmpty = count == 0
+        statisticViewContainer.isHidden = isEmpty
+        nothingAnalyzeLabel.isHidden = !isEmpty
+        nothingAnalyzeImage.isHidden = !isEmpty
+        if !isEmpty {
+           countLabel.text = "\(count)"
         }
     }
     

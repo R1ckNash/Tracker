@@ -12,10 +12,10 @@ protocol NewTrackerDelegate: AnyObject {
 }
 
 enum FilterType: Int {
-    case allTrackers = 0
-    case trackersForToday = 1
-    case completed = 2
-    case notCompleted = 3
+    case allTrackers
+    case trackersForToday
+    case completed
+    case notCompleted
 }
 
 final class TrackerVC: UIViewController {
@@ -101,11 +101,11 @@ final class TrackerVC: UIViewController {
     private var currentDate = Date()
     
     private lazy var dataProvider: DataProvider = {
-        return DIContainer.shared.makeDataProvider()
+        DIContainer.shared.makeDataProvider()
     }()
     
     private lazy var analyticsService: AnalyticsService = {
-        return DIContainer.shared.makeAnalyticsService()
+        DIContainer.shared.makeAnalyticsService()
     }()
     
     private var currentFilter: FilterType = .allTrackers
@@ -332,12 +332,7 @@ extension TrackerVC: UICollectionViewDelegateFlowLayout {
             guard let self = self else { return }
             analyticsService.report(event: .click, item: .edit)
             let editVC = EditTrackerVC()
-            
-            if tracker.schedule.isEmpty {
-                editVC.trackerType = .event
-            } else {
-                editVC.trackerType = .habit
-            }
+            editVC.trackerType = tracker.schedule.isEmpty ? .event : .habit
             editVC.delegate = self
             editVC.tracker = tracker
             editVC.completedCount = dataProvider.getCompleteDaysCount(for: tracker.id)
@@ -501,14 +496,9 @@ extension TrackerVC: UISearchResultsUpdating {
         dataProvider.filterCategories(with: searchText)
         collectionView.reloadData()
         
-        if dataProvider.getNumberOfSections() == 0 && !(searchText?.isEmpty ?? true) {
-            nothingFoundLabel.isHidden = false
-            nothingFoundImage.isHidden = false
-            filtersButton.isHidden = true
-        } else {
-            nothingFoundLabel.isHidden = true
-            nothingFoundImage.isHidden = true
-            filtersButton.isHidden = false
-        }
+        let isNothingFound = dataProvider.getNumberOfSections() == 0 && !(searchText?.isEmpty ?? true)
+        nothingFoundLabel.isHidden = !isNothingFound
+        nothingFoundImage.isHidden = !isNothingFound
+        filtersButton.isHidden = isNothingFound
     }
 }
